@@ -1,6 +1,12 @@
 # 2021.01.22
 
 INTEGER, PLUS, EOF = "INTEGER", "PLUS", "EOF"
+MINUS = "MINUS"
+
+OPERATORS = {
+    "+": PLUS,
+    "-": MINUS
+}
 
 
 class Token:
@@ -34,18 +40,15 @@ class Interpreter:
         text = self.text
         if self.pos > len(text) - 1:
             return Token(EOF, None)
+        self._skip_whitespace()
 
         current_char = text[self.pos]
 
         if current_char.isdigit():
-            token = Token(INTEGER, int(current_char))
-            self.pos += 1
-            return token
+            return self._read_integer_token()
 
-        if current_char == "+":
-            token = Token(PLUS, current_char)
-            self.pos += 1
-            return token
+        if current_char in OPERATORS:
+            return self._read_operator_token()
 
         self.error()
 
@@ -62,13 +65,48 @@ class Interpreter:
         self.eat(INTEGER)
 
         op = self.current_token
-        self.eat(PLUS)
+        self.eat(MINUS)
 
         right = self.current_token
         self.eat(INTEGER)
 
-        result = left.value + right.value
+        result = _calculate(left, op, right)
         return result
+
+    def _skip_whitespace(self):
+        while self._get_current_char().isspace():
+            self._next_char()
+
+    def _read_integer_token(self):
+        val = ""
+        while self._has_more() and self._get_current_char().isdigit():
+            val += self._get_current_char()
+            self._next_char()
+        return Token(INTEGER, int(val))
+
+    def _read_operator_token(self):
+        t = Token(
+            OPERATORS[self._get_current_char()],
+            self._get_current_char()
+        )
+        self._next_char()
+        return t
+
+    def _get_current_char(self):
+        return self.text[self.pos]
+
+    def _next_char(self):
+        self.pos += 1
+
+    def _has_more(self):
+        return self.pos < len(self.text)
+
+
+def _calculate(left_token, operator_token, right_token):
+    if operator_token.ttype == PLUS:
+        return left_token.value + right_token.value
+    elif operator_token.ttype == MINUS:
+        return left_token.value - right_token.value
 
 
 def main():
