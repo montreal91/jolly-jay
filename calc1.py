@@ -10,12 +10,18 @@ OPERATORS = {
 
 
 class Token:
-    def __init__(self, ttype, value):
-        self.ttype = ttype
-        self.value = value
+    def __init__(self, type_, value):
+        self._type = type_
+        self._value = value
+
+    def get_type(self):
+        return self._type
+
+    def get_value(self):
+        return self._value
 
     def __str__(self):
-        return f"Token({self.ttype}, {self.value})"
+        return f"Token({self._type}, {self._value})"
 
     def __repr__(self):
         return self.__str__()
@@ -27,10 +33,30 @@ class Interpreter:
         self.pos = 0
         self.current_token = None
 
-    def error(self):
+    def expr(self):
+        self.current_token = self._get_next_token()
+
+        left = self.current_token
+        self._eat(INTEGER)
+
+        op = self.current_token
+        if op.get_type() == PLUS:
+            self._eat(PLUS)
+        elif op.get_type() == MINUS:
+            self._eat(MINUS)
+        else:
+            self._throw_error()
+
+        right = self.current_token
+        self._eat(INTEGER)
+
+        result = _calculate(left, op, right)
+        return result
+
+    def _throw_error(self):
         raise Exception("Error parsing input")
 
-    def get_next_token(self):
+    def _get_next_token(self):
         """
         Lexical analyzer (also known as scanner or tokenizer)
 
@@ -50,28 +76,13 @@ class Interpreter:
         if current_char in OPERATORS:
             return self._read_operator_token()
 
-        self.error()
+        self._throw_error()
 
-    def eat(self, token_type):
-        if self.current_token.ttype == token_type:
-            self.current_token = self.get_next_token()
+    def _eat(self, token_type):
+        if self.current_token.get_type() == token_type:
+            self.current_token = self._get_next_token()
         else:
-            self.error()
-
-    def expr(self):
-        self.current_token = self.get_next_token()
-
-        left = self.current_token
-        self.eat(INTEGER)
-
-        op = self.current_token
-        self.eat(MINUS)
-
-        right = self.current_token
-        self.eat(INTEGER)
-
-        result = _calculate(left, op, right)
-        return result
+            self._throw_error()
 
     def _skip_whitespace(self):
         while self._get_current_char().isspace():
@@ -103,17 +114,25 @@ class Interpreter:
 
 
 def _calculate(left_token, operator_token, right_token):
-    if operator_token.ttype == PLUS:
-        return left_token.value + right_token.value
-    elif operator_token.ttype == MINUS:
-        return left_token.value - right_token.value
+    if operator_token.get_type() == PLUS:
+        return left_token.get_value() + right_token.get_value()
+    elif operator_token.get_type() == MINUS:
+        return left_token.get_value() - right_token.get_value()
 
 
 def main():
+    print("Press Ctrl+C to quit.")
     while True:
         try:
             text = input("calc> ")
         except EOFError:
+            break
+        except KeyboardInterrupt:
+            print(
+                "\nIt is man's natural sickness "
+                "to believe that he possesses the Truth."
+            )
+
             break
         if not text:
             continue
