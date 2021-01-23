@@ -1,11 +1,17 @@
 # 2021.01.22
 
-INTEGER, PLUS, EOF = "INTEGER", "PLUS", "EOF"
+INTEGER = "INTEGER"
+PLUS = "PLUS"
 MINUS = "MINUS"
+MULTIPLY = "MULTIPLY"
+DIVIDE = "DIVIDE"
+EOF = "EOF"
 
 OPERATORS = {
     "+": PLUS,
-    "-": MINUS
+    "-": MINUS,
+    "*": MULTIPLY,
+    "/": DIVIDE,
 }
 
 
@@ -36,22 +42,21 @@ class Interpreter:
     def expr(self):
         self.current_token = self._get_next_token()
 
-        left = self.current_token
+        left = self.current_token.get_value()
         self._eat(INTEGER)
 
-        op = self.current_token
-        if op.get_type() == PLUS:
-            self._eat(PLUS)
-        elif op.get_type() == MINUS:
-            self._eat(MINUS)
-        else:
-            self._throw_error()
-
-        right = self.current_token
-        self._eat(INTEGER)
-
-        result = _calculate(left, op, right)
-        return result
+        while self.current_token.get_type() != EOF:
+            op = self.current_token
+            if op.get_type() in OPERATORS.values():
+                self._eat(op.get_type())
+            else:
+                self._throw_error()
+            right = self.current_token
+            self._eat(INTEGER)
+            left = _calculate(
+                left, op.get_type(), right.get_value()
+            )
+        return left
 
     def _throw_error(self):
         raise Exception("Error parsing input")
@@ -113,11 +118,16 @@ class Interpreter:
         return self.pos < len(self.text)
 
 
-def _calculate(left_token, operator_token, right_token):
-    if operator_token.get_type() == PLUS:
-        return left_token.get_value() + right_token.get_value()
-    elif operator_token.get_type() == MINUS:
-        return left_token.get_value() - right_token.get_value()
+def _calculate(left, operator_type, right):
+    if operator_type == PLUS:
+        return left + right
+    elif operator_type == MINUS:
+        return left - right
+    elif operator_type == MULTIPLY:
+        return left * right
+    elif operator_type == DIVIDE:
+        return left // right
+    Exception("Incorrect operator type.")
 
 
 def main():
