@@ -40,23 +40,29 @@ class Interpreter:
         self.current_token = None
 
     def expr(self):
+        """Parser/Interpreter."""
+
         self.current_token = self._get_next_token()
 
-        left = self.current_token.get_value()
-        self._eat(INTEGER)
-
+        result = self._term()
         while self.current_token.get_type() != EOF:
             op = self.current_token
             if op.get_type() in OPERATORS.values():
                 self._eat(op.get_type())
             else:
                 self._throw_error()
-            right = self.current_token
-            self._eat(INTEGER)
-            left = _calculate(
-                left, op.get_type(), right.get_value()
+            result = _calculate(
+                result, op.get_type(), self._term()
             )
-        return left
+
+        return result
+
+    def _term(self):
+        """Return an INTEGER token value."""
+
+        token = self.current_token
+        self._eat(INTEGER)
+        return token.get_value()
 
     def _throw_error(self):
         raise Exception("Error parsing input")
