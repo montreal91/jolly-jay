@@ -1,12 +1,16 @@
 // 2021.01.24
-
-val INTEGER: String = "INTEGER"
-val PLUS = "PLUS"
-val MINUS = "MINUS"
-val EOF = "EOF"
+import kotlin.text.StringBuilder
 
 
-data class Token(val type: String, val value: Int?)
+typealias TokenType = String
+
+val INTEGER: TokenType = "INTEGER"
+val PLUS: TokenType = "PLUS"
+val MINUS: TokenType = "MINUS"
+val EOF: TokenType = "EOF"
+
+
+data class Token(val type: TokenType, val value: Int?)
 
 
 class Interpreter(
@@ -21,37 +25,71 @@ class Interpreter(
   }
 
   fun expr(): Int {
-    val left = Eat(INTEGER)
-    val op = Eat(PLUS)
-    val right = Eat(INTEGER)
+    val left = eat(INTEGER)
+    val op = when {
+      currentToken.type.equals(PLUS) -> eat(PLUS)
+      currentToken.type.equals(MINUS) -> eat(MINUS)
+      else -> error()
+    }
+    val right = eat(INTEGER)
+
     if (left.value == null || right.value == null) {
       throw Exception("Syntax error.")
     }
-    return left.value + right.value
+    return when {
+      op.type.equals(PLUS) -> left.value + right.value
+      op.type.equals(MINUS) -> left.value - right.value
+      else -> error()
+    }
   }
 
   private fun getNextToken(): Token {
+    skip()
     val res = when {
       pos >= input.length -> Token(type=EOF, value=null)
-      input[pos].isDigit() -> Token(type=INTEGER, value=input[pos].getIntValue())
-      input[pos].equals('+') -> Token(type=PLUS, value=null)
-      input[pos].equals('-') -> Token(type=MINUS, value=null)
+      input[pos].isDigit() -> readInt()
+      input[pos].equals('+') -> readOperator()
+      input[pos].equals('-') -> readOperator()
       else -> Token(type=EOF, value=null)
     }
-    nextChar()
     return res
   }
 
   private fun nextChar() {
-    pos++;
+    pos++
+  }
+
+  private fun skip() {
+    while (pos < input.length && input[pos] == ' ') {
+      pos++
+    }
   }
 
   private fun error(): Nothing {
     throw Exception("Syntax error.")
   }
 
-  private fun Eat(token_type: String): Token {
-    if (currentToken.type == token_type) {
+  private fun readInt(): Token {
+    val sb: StringBuilder = StringBuilder()
+    while (pos < input.length && input[pos].isDigit()) {
+      sb.append(input[pos])
+      nextChar()
+    }
+    return Token(value=sb.toString().toInt(), type=INTEGER)
+  }
+
+  private fun readOperator(): Token {
+    val res = when {
+      input[pos] == '+' -> Token(type=PLUS, value=null)
+      input[pos] == '-' -> Token(type=MINUS, value=null)
+      else -> error()
+    }
+    nextChar()
+    return res
+  }
+
+  private fun eat(tokenType: TokenType): Token {
+    if (currentToken.type == tokenType) {
       val res = currentToken
       currentToken = getNextToken()
       return res
