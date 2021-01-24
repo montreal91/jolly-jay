@@ -21,13 +21,8 @@ class Interpreter(
   }
 
   fun expr(): Int {
-    Eat(INTEGER)
-    val left = currentToken
-    nextChar()
-    currentToken = getNextToken()
+    val left = Eat(INTEGER)
     val op = Eat(PLUS)
-    nextChar()
-    currentToken = getNextToken()
     val right = Eat(INTEGER)
     if (left.value == null || right.value == null) {
       throw Exception("Syntax error.")
@@ -35,12 +30,16 @@ class Interpreter(
     return left.value + right.value
   }
 
-  private fun getNextToken(): Token = when {
-    pos >= input.length -> Token(type=EOF, value=null)
-    input[pos].isDigit() -> Token(type=INTEGER, value=input[pos].getIntValue())
-    input[pos].equals('+') -> Token(type=PLUS, value=null)
-    input[pos].equals('-') -> Token(type=MINUS, value=null)
-    else -> Token(type=EOF, value=null)
+  private fun getNextToken(): Token {
+    val res = when {
+      pos >= input.length -> Token(type=EOF, value=null)
+      input[pos].isDigit() -> Token(type=INTEGER, value=input[pos].getIntValue())
+      input[pos].equals('+') -> Token(type=PLUS, value=null)
+      input[pos].equals('-') -> Token(type=MINUS, value=null)
+      else -> Token(type=EOF, value=null)
+    }
+    nextChar()
+    return res
   }
 
   private fun nextChar() {
@@ -53,7 +52,9 @@ class Interpreter(
 
   private fun Eat(token_type: String): Token {
     if (currentToken.type == token_type) {
-      return getNextToken()
+      val res = currentToken
+      currentToken = getNextToken()
+      return res
     }
     else {
       error()
