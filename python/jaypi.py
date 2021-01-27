@@ -5,16 +5,18 @@ from lexer import Lexer
 from lexer import (
     DIVIDE,
     INTEGER,
+    LPAR,
     MINUS,
     MULTIPLY,
     PLUS,
+    RPAR,
 )
+
 
 class Interpreter:
     def __init__(self, lexer):
         self._lexer = lexer
         self._current_token = self._lexer.get_next_token()
-
 
     def expr(self):
         """
@@ -22,7 +24,7 @@ class Interpreter:
 
         expr    : operand ((PLUS|MINUS) operand)
         operand : factor ((MULTIPLY | DIVIDE) factor)
-        factor  : INTEGER
+        factor  : (INTEGER | LPAR expr RPAR)
         """
         result = self._operand()
         while self._current_token.get_type() in (PLUS, MINUS):
@@ -42,7 +44,7 @@ class Interpreter:
         Operand Parser/Interpreter.
 
         operand : factor ((MULTIPLY | DIVIDE) factor)
-        factor  : INTEGER
+        factor  : (INTEGER | LPAR expr RPAR)
         """
 
         result = self._factor()
@@ -63,12 +65,20 @@ class Interpreter:
         """
         Return an INTEGER token value.
 
-        factor : INTEGER
+        factor  : (INTEGER | LPAR expr RPAR)
         """
 
-        token = self._current_token
-        self._eat(INTEGER)
-        return token.get_value()
+        if self._current_token.get_type() == INTEGER:
+            token = self._current_token
+            self._eat(INTEGER)
+            return token.get_value()
+
+        if self._current_token.get_type() == LPAR:
+            self._eat(LPAR)
+            res = self.expr()
+            self._eat(RPAR)
+            return res
+        self._throw_error()
 
     def _throw_error(self):
         raise Exception("Error parsing input")

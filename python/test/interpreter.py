@@ -98,3 +98,14 @@ class InterpreterTc(TestCase):
         x4 = randint(MIN, MAX)
         i = _make_interpreter(f"{x1} + {x2} * {x3} - {x4}")
         self.assertEqual(i.expr(), x1 + x2 * x3 - x4)
+
+    def test_parentheses(self):
+        i = _make_interpreter("(16 + 5) * 2")
+        self.assertEqual(i.expr(), 42)
+
+    def test_parentheses_rnd(self):
+        x1 = randint(MIN, MAX)
+        x2 = randint(MIN, MAX)
+        x3 = randint(MIN, MAX)
+        i = _make_interpreter(f"{x1} * ({x2} + {x3})")
+        self.assertEqual(i.expr(), x1 * (x2 + x3))
