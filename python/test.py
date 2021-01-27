@@ -1,6 +1,7 @@
 
 import unittest
 
+from test.interpreter import InterpreterTc
 from test.lexer import LexerTc
 
 
