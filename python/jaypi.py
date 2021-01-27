@@ -1,139 +1,88 @@
 # 2021.01.22
 
-INTEGER = "INTEGER"
-PLUS = "PLUS"
-MINUS = "MINUS"
-MULTIPLY = "MULTIPLY"
-DIVIDE = "DIVIDE"
-EOF = "EOF"
+from lexer import Lexer
 
-OPERATORS = {
-    "+": PLUS,
-    "-": MINUS,
-    "*": MULTIPLY,
-    "/": DIVIDE,
-}
-
-
-class Token:
-    def __init__(self, type_, value):
-        self._type = type_
-        self._value = value
-
-    def get_type(self):
-        return self._type
-
-    def get_value(self):
-        return self._value
-
-    def __str__(self):
-        return f"Token({self._type}, {self._value})"
-
-    def __repr__(self):
-        return self.__str__()
-
+from lexer import (
+    DIVIDE,
+    INTEGER,
+    MINUS,
+    MULTIPLY,
+    PLUS,
+)
 
 class Interpreter:
-    def __init__(self, text):
-        self.text = text
-        self.pos = 0
-        self.current_token = None
+    def __init__(self, lexer):
+        self._lexer = lexer
+        self._current_token = self._lexer.get_next_token()
+
 
     def expr(self):
-        """Parser/Interpreter."""
+        """
+        Arithmetic expression Parser/Interpreter.
 
-        self.current_token = self._get_next_token()
-
-        result = self._term()
-        while self.current_token.get_type() != EOF:
-            op = self.current_token
-            if op.get_type() in OPERATORS.values():
-                self._eat(op.get_type())
+        expr    : operand ((PLUS|MINUS) operand)
+        operand : factor ((MULTIPLY | DIVIDE) factor)
+        factor  : INTEGER
+        """
+        result = self._operand()
+        while self._current_token.get_type() in (PLUS, MINUS):
+            op = self._current_token
+            if op.get_type() == PLUS:
+                self._eat(PLUS)
+                result += self._operand()
+            elif op.get_type() == MINUS:
+                self._eat(MINUS)
+                result -= self._operand()
             else:
                 self._throw_error()
-            result = _calculate(
-                result, op.get_type(), self._term()
-            )
+        return result
+
+    def _operand(self):
+        """
+        Operand Parser/Interpreter.
+
+        operand : factor ((MULTIPLY | DIVIDE) factor)
+        factor  : INTEGER
+        """
+
+        result = self._factor()
+        while self._current_token.get_type() in (MULTIPLY, DIVIDE):
+            op = self._current_token
+            if op.get_type() == MULTIPLY:
+                self._eat(MULTIPLY)
+                result *= self._factor()
+            elif op.get_type() == DIVIDE:
+                self._eat(DIVIDE)
+                result //= self._factor()
+            else:
+                self._throw_error()
 
         return result
 
-    def _term(self):
-        """Return an INTEGER token value."""
+    def _factor(self):
+        """
+        Return an INTEGER token value.
 
-        token = self.current_token
+        factor : INTEGER
+        """
+
+        token = self._current_token
         self._eat(INTEGER)
         return token.get_value()
 
     def _throw_error(self):
         raise Exception("Error parsing input")
 
-    def _get_next_token(self):
-        """
-        Lexical analyzer (also known as scanner or tokenizer)
-
-        This method is responsible for braking a sentence apart into tokens.
-        One token at a time.
-        """
-        text = self.text
-        if self.pos > len(text) - 1:
-            return Token(EOF, None)
-        self._skip_whitespace()
-
-        current_char = text[self.pos]
-
-        if current_char.isdigit():
-            return self._read_integer_token()
-
-        if current_char in OPERATORS:
-            return self._read_operator_token()
-
-        self._throw_error()
-
     def _eat(self, token_type):
-        if self.current_token.get_type() == token_type:
-            self.current_token = self._get_next_token()
+        if self._current_token.get_type() == token_type:
+            self._current_token = self._lexer.get_next_token()
         else:
             self._throw_error()
 
-    def _skip_whitespace(self):
-        while self._get_current_char().isspace():
-            self._next_char()
 
-    def _read_integer_token(self):
-        val = ""
-        while self._has_more() and self._get_current_char().isdigit():
-            val += self._get_current_char()
-            self._next_char()
-        return Token(INTEGER, int(val))
-
-    def _read_operator_token(self):
-        t = Token(
-            OPERATORS[self._get_current_char()],
-            self._get_current_char()
-        )
-        self._next_char()
-        return t
-
-    def _get_current_char(self):
-        return self.text[self.pos]
-
-    def _next_char(self):
-        self.pos += 1
-
-    def _has_more(self):
-        return self.pos < len(self.text)
-
-
-def _calculate(left, operator_type, right):
-    if operator_type == PLUS:
-        return left + right
-    elif operator_type == MINUS:
-        return left - right
-    elif operator_type == MULTIPLY:
-        return left * right
-    elif operator_type == DIVIDE:
-        return left // right
-    Exception("Incorrect operator type.")
+def _evaluate(text):
+    interpreter = Interpreter(Lexer(text))
+    return interpreter.expr()
 
 
 def main():
@@ -145,16 +94,16 @@ def main():
             break
         except KeyboardInterrupt:
             print(
-                "\nIt is man's natural sickness "
+                "\n"
+                "It is man's natural sickness "
                 "to believe that he possesses the Truth."
+                "\n"
             )
 
             break
         if not text:
             continue
-        interpreter = Interpreter(text)
-        result = interpreter.expr()
-        print(result)
+        print(_evaluate(text))
 
 
 if __name__ == "__main__":
