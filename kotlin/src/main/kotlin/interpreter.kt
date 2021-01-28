@@ -12,11 +12,12 @@ class Interpreter(private val lexer: Lexer) {
   //
   // Process expr rule
   //
-  // expr   : factor ((PLUS | MINUS) factor) *
-  // factor : INTEGER
+  // expr    : operand ((PLUS | MINUS) operand) *
+  // operand : factor ((MUL | DIV) factor) *
+  // factor  : INTEGER
   //
   private fun Expr(): Int {
-    var left = Factor()
+    var left = Operand()
 
     while (currentToken.GetType() == PLUS || currentToken.GetType() == MINUS) {
       val op = currentToken
@@ -25,7 +26,7 @@ class Interpreter(private val lexer: Lexer) {
         op.GetType().equals(MINUS) -> Eat(MINUS)
         else -> Error()
       }
-      val right = Factor()
+      val right = Operand()
       left = when {
         op.GetType().equals(PLUS) -> left + right
         op.GetType().equals(MINUS) -> left - right
@@ -36,9 +37,34 @@ class Interpreter(private val lexer: Lexer) {
   }
 
   //
+  // Process operand rule
+  //
+  // operand : factor ((MUL | DIV) factor) *
+  // factor  : INTEGER
+  //
+  private fun Operand(): Int {
+    var left = Factor()
+    while (currentToken.GetType() == MUL || currentToken.GetType() == DIV) {
+      val op = currentToken
+      when {
+        op.GetType().equals(MUL) -> Eat(MUL)
+        op.GetType().equals(DIV) -> Eat(DIV)
+        else -> Error()
+      }
+      val right = Operand()
+      left = when {
+        op.GetType().equals(MUL) -> left * right
+        op.GetType().equals(DIV) -> left / right
+        else -> Error()
+      }
+    }
+    return left
+  }
+
+  //
   // Process factor rule
   //
-  // factor : INTEGER
+  // factor  : INTEGER
   //
   private fun Factor(): Int {
     val token = currentToken

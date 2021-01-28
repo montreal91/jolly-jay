@@ -14,7 +14,7 @@ class Lexer(private val text: String) {
 
     return when {
       text[pos].isDigit() -> ReadInteger()
-      text[pos] == '+' || text[pos] == '-' -> ReadOperator()
+      OPERATORS.contains(text[pos]) -> ReadOperator()
       else -> Error()
     }
   }
@@ -40,6 +40,8 @@ class Lexer(private val text: String) {
     return when {
       char == '+' -> OperatorToken(PLUS, "+")
       char == '-' -> OperatorToken(MINUS, "-")
+      char == '/' -> OperatorToken(DIV, "/")
+      char == '*' -> OperatorToken(MUL, "*")
       else -> Error()
     }
   }

@@ -7,7 +7,11 @@ typealias OperatorValueType = String
 val INTEGER: TokenType = "INTEGER"
 val PLUS: TokenType = "PLUS"
 val MINUS: TokenType = "MINUS"
+val MUL: TokenType = "MUL"
+val DIV: TokenType = "DIV"
 val EOF: TokenType = "EOF"
+
+val OPERATORS = listOf('+', '-', '*', '/')
 
 
 open class Token(private val type_: TokenType) {
