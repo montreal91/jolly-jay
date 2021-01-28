@@ -7,6 +7,8 @@ MINUS = "MINUS"
 MULTIPLY = "MULTIPLY"
 DIVIDE = "DIVIDE"
 EOF = "EOF"
+LPAR = "LPAR"
+RPAR = "RPAR"
 
 OPERATORS = {
     "+": PLUS,
@@ -57,6 +59,16 @@ class Lexer:
 
         if current_char in OPERATORS:
             return self._read_operator_token()
+
+        if current_char == "(":
+            token = Token(LPAR, "(")
+            self._next_char()
+            return token
+
+        if current_char == ")":
+            token = Token(RPAR, ")")
+            self._next_char()
+            return token
 
         self._throw_error()
 

@@ -42,6 +42,18 @@ class LexerTc(TestCase):
         from lexer import PLUS
         self._check_token(token=token, expected_type=PLUS, expected_value="+")
 
+    def test_lexer_lpar(self):
+        lexer = _make_lexer("(")
+        token = lexer.get_next_token()
+        from lexer import LPAR
+        self._check_token(token=token, expected_type=LPAR, expected_value="(")
+
+    def test_lexer_rpar(self):
+        lexer = _make_lexer(")")
+        token = lexer.get_next_token()
+        from lexer import RPAR
+        self._check_token(token=token, expected_type=RPAR, expected_value=")")
+
     def test_lexer_expression(self):
         lexer = _make_lexer("10 + 11 - 12 * 13 / 2")
         from lexer import (

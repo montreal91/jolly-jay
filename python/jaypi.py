@@ -5,24 +5,30 @@ from lexer import Lexer
 from lexer import (
     DIVIDE,
     INTEGER,
+    LPAR,
     MINUS,
     MULTIPLY,
     PLUS,
+    RPAR,
 )
+
 
 class Interpreter:
     def __init__(self, lexer):
         self._lexer = lexer
         self._current_token = self._lexer.get_next_token()
 
+    def execute(self):
+        """Executes the arithmetic expression."""
+        return self._expr()
 
-    def expr(self):
+    def _expr(self):
         """
         Arithmetic expression Parser/Interpreter.
 
         expr    : operand ((PLUS|MINUS) operand)
         operand : factor ((MULTIPLY | DIVIDE) factor)
-        factor  : INTEGER
+        factor  : (INTEGER | LPAR expr RPAR)
         """
         result = self._operand()
         while self._current_token.get_type() in (PLUS, MINUS):
@@ -42,7 +48,7 @@ class Interpreter:
         Operand Parser/Interpreter.
 
         operand : factor ((MULTIPLY | DIVIDE) factor)
-        factor  : INTEGER
+        factor  : (INTEGER | LPAR expr RPAR)
         """
 
         result = self._factor()
@@ -63,12 +69,20 @@ class Interpreter:
         """
         Return an INTEGER token value.
 
-        factor : INTEGER
+        factor  : (INTEGER | LPAR expr RPAR)
         """
 
-        token = self._current_token
-        self._eat(INTEGER)
-        return token.get_value()
+        if self._current_token.get_type() == INTEGER:
+            token = self._current_token
+            self._eat(INTEGER)
+            return token.get_value()
+
+        if self._current_token.get_type() == LPAR:
+            self._eat(LPAR)
+            res = self._expr()
+            self._eat(RPAR)
+            return res
+        self._throw_error()
 
     def _throw_error(self):
         raise Exception("Error parsing input")
@@ -82,14 +96,15 @@ class Interpreter:
 
 def _evaluate(text):
     interpreter = Interpreter(Lexer(text))
-    return interpreter.expr()
+    return interpreter.execute()
 
 
 def main():
     print("Press Ctrl+C to quit.")
+    counter = 0
     while True:
         try:
-            text = input("calc> ")
+            text = input(f"In  [{counter}]: ")
         except EOFError:
             break
         except KeyboardInterrupt:
@@ -103,7 +118,8 @@ def main():
             break
         if not text:
             continue
-        print(_evaluate(text))
+        print(f"Out [{counter}]: {_evaluate(text)}")
+        counter += 1
 
 
 if __name__ == "__main__":
