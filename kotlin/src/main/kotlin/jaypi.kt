@@ -1,4 +1,6 @@
 // 2021.01.24
+package main
+
 import kotlin.text.StringBuilder
 
 
