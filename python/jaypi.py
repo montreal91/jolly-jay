@@ -18,7 +18,11 @@ class Interpreter:
         self._lexer = lexer
         self._current_token = self._lexer.get_next_token()
 
-    def expr(self):
+    def execute(self):
+        """Executes the arithmetic expression."""
+        return self._expr()
+
+    def _expr(self):
         """
         Arithmetic expression Parser/Interpreter.
 
@@ -75,7 +79,7 @@ class Interpreter:
 
         if self._current_token.get_type() == LPAR:
             self._eat(LPAR)
-            res = self.expr()
+            res = self._expr()
             self._eat(RPAR)
             return res
         self._throw_error()
@@ -92,7 +96,7 @@ class Interpreter:
 
 def _evaluate(text):
     interpreter = Interpreter(Lexer(text))
-    return interpreter.expr()
+    return interpreter.execute()
 
 
 def main():
