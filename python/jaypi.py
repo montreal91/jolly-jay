@@ -97,9 +97,10 @@ def _evaluate(text):
 
 def main():
     print("Press Ctrl+C to quit.")
+    counter = 0
     while True:
         try:
-            text = input("calc> ")
+            text = input(f"In  [{counter}]: ")
         except EOFError:
             break
         except KeyboardInterrupt:
@@ -113,7 +114,8 @@ def main():
             break
         if not text:
             continue
-        print(_evaluate(text))
+        print(f"Out [{counter}]: {_evaluate(text)}")
+        counter += 1
 
 
 if __name__ == "__main__":
