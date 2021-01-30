@@ -7,6 +7,9 @@ class Interpreter(private val lexer: Lexer) {
   //
   // Execute arithmetic expression
   //
+  // IN : (561 - 5 * (52 + 59)) * (28 - 21)
+  // OUT: 42
+  //
   fun Execute(): Int = Expr()
 
   //
@@ -14,7 +17,7 @@ class Interpreter(private val lexer: Lexer) {
   //
   // expr    : operand ((PLUS | MINUS) operand) *
   // operand : factor ((MUL | DIV) factor) *
-  // factor  : INTEGER
+  // factor  : INTEGER | LPAR expr RPAR
   //
   private fun Expr(): Int {
     var left = Operand()
@@ -40,7 +43,7 @@ class Interpreter(private val lexer: Lexer) {
   // Process operand rule
   //
   // operand : factor ((MUL | DIV) factor) *
-  // factor  : INTEGER
+  // factor  : INTEGER | LPAR expr RPAR
   //
   private fun Operand(): Int {
     var left = Factor()
@@ -64,15 +67,24 @@ class Interpreter(private val lexer: Lexer) {
   //
   // Process factor rule
   //
-  // factor  : INTEGER
+  // factor  : INTEGER | LPAR expr RPAR
   //
   private fun Factor(): Int {
     val token = currentToken
-    Eat(INTEGER)
-    return when(token) {
-      is IntegerToken -> token.GetValue()
-      else -> Error()
+    if (token.GetType() == INTEGER) {
+      Eat(INTEGER)
+      return when(token) {
+        is IntegerToken -> token.GetValue()
+        else -> Error()
+      }
     }
+    if (token.GetType() == LPAR) {
+      Eat(LPAR)
+      val res = Expr()
+      Eat(RPAR)
+      return res
+    }
+    Error()
   }
 
   private fun Eat(tokenType: TokenType) {

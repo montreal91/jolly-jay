@@ -49,6 +49,20 @@ class LexerTest {
   }
 
   @Test
+  fun TestLpar() {
+    val lexer = MakeLexer("(")
+    val token = lexer.GetNextToken()
+    CheckToken(token, LPAR, "(")
+  }
+
+  @Test
+  fun TestRPar() {
+    val lexer = MakeLexer(")")
+    val token = lexer.GetNextToken()
+    CheckToken(token, RPAR, ")")
+  }
+
+  @Test
   fun TestExpression0() {
     val lexer = MakeLexer("1 + 2 - 3")
 
@@ -99,7 +113,65 @@ class LexerTest {
 
     token = lexer.GetNextToken()
     CheckToken(token, EOF, 0)
+  }
 
+  @Test
+  fun TestExpression2() {
+    val lexer = MakeLexer("(32 + 2) * 256 - (128 * (8 + 4))")
+
+    var token: Token = lexer.GetNextToken()
+    CheckToken(token, LPAR, "(")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, INTEGER, 32)
+
+    token = lexer.GetNextToken()
+    CheckToken(token, PLUS, "+")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, INTEGER, 2)
+
+    token = lexer.GetNextToken()
+    CheckToken(token, RPAR, ")")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, MUL, "*")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, INTEGER, 256)
+
+    token = lexer.GetNextToken()
+    CheckToken(token, MINUS, "-")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, LPAR, "(")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, INTEGER, 128)
+
+    token = lexer.GetNextToken()
+    CheckToken(token, MUL, "*")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, LPAR, "(")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, INTEGER, 8)
+
+    token = lexer.GetNextToken()
+    CheckToken(token, PLUS, "+")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, INTEGER, 4)
+
+    token = lexer.GetNextToken()
+    CheckToken(token, RPAR, ")")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, RPAR, ")")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, EOF, 0)
   }
 }
 

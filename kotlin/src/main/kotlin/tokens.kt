@@ -9,6 +9,8 @@ val PLUS: TokenType = "PLUS"
 val MINUS: TokenType = "MINUS"
 val MUL: TokenType = "MUL"
 val DIV: TokenType = "DIV"
+val LPAR: TokenType = "LPAR"
+val RPAR: TokenType = "RPAR"
 val EOF: TokenType = "EOF"
 
 val OPERATORS = listOf('+', '-', '*', '/')
@@ -33,3 +35,5 @@ class OperatorToken(
     return value;
   }
 }
+
+typealias ParenToken = OperatorToken
