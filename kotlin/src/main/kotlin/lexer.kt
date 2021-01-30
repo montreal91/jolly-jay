@@ -3,6 +3,15 @@ package interpreter
 import kotlin.text.StringBuilder
 
 
+fun Char.IsOperator() = OPERATORS.contains(this)
+
+
+fun Char.IsParen() = when {
+  this == '(' || this == ')' -> true
+  else -> false
+}
+
+
 class Lexer(private val text: String) {
   private var pos: Int = 0
 
@@ -14,7 +23,8 @@ class Lexer(private val text: String) {
 
     return when {
       text[pos].isDigit() -> ReadInteger()
-      OPERATORS.contains(text[pos]) -> ReadOperator()
+      text[pos].IsOperator() -> ReadOperator()
+      text[pos].IsParen() -> ReadParen()
       else -> Error()
     }
   }
@@ -42,6 +52,16 @@ class Lexer(private val text: String) {
       char == '-' -> OperatorToken(MINUS, "-")
       char == '/' -> OperatorToken(DIV, "/")
       char == '*' -> OperatorToken(MUL, "*")
+      else -> Error()
+    }
+  }
+
+  private fun ReadParen(): ParenToken {
+    val char = text[pos]
+    pos++
+    return when {
+      char == '(' -> ParenToken(LPAR, "(")
+      char == ')' -> ParenToken(RPAR, ")")
       else -> Error()
     }
   }

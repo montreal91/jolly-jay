@@ -49,6 +49,12 @@ class InterpreterTest {
     val i = MakeInterpreter("700 / 7 + 11 * 2 - 16 * 5")
     assertEquals(THE_ANSWER, i.Execute())
   }
+
+  @Test
+  fun TestComplexExpression1() {
+    val i = MakeInterpreter("(561 - 5 * (52 + 59)) * (28 - 21)")
+    assertEquals(THE_ANSWER, i.Execute())
+  }
 }
 
 
