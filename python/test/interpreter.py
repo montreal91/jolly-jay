@@ -2,15 +2,16 @@
 from random import randint
 from unittest import TestCase
 
-from jaypi import Interpreter
 from lexer import Lexer
+from parser import Parser
+from interpreter import Interpreter
 
 
 MIN, MAX = 100, 1000
 
 
 def _make_interpreter(text):
-    return Interpreter(lexer=Lexer(text=text))
+    return Interpreter(parser=Parser(lexer=Lexer(text=text)))
 
 
 class InterpreterTc(TestCase):
