@@ -19,12 +19,19 @@ class Interpreter:
         self._current_token = self._lexer.get_next_token()
 
     def execute(self):
-        """Executes the arithmetic expression."""
+        """
+        Executes the arithmetic expression.
+
+        Input: 42 * (3 + 4 * (12 - 3)) - (256 - 128 - 16 - 8 - 4) * (8 + 2)
+        Expected ouptut: 638
+        """
         return self._expr()
 
     def _expr(self):
         """
         Arithmetic expression Parser/Interpreter.
+
+        Processes expr production.
 
         expr    : operand ((PLUS|MINUS) operand)
         operand : factor ((MULTIPLY | DIVIDE) factor)
@@ -45,7 +52,7 @@ class Interpreter:
 
     def _operand(self):
         """
-        Operand Parser/Interpreter.
+        Processes operand production.
 
         operand : factor ((MULTIPLY | DIVIDE) factor)
         factor  : (INTEGER | LPAR expr RPAR)
@@ -67,7 +74,7 @@ class Interpreter:
 
     def _factor(self):
         """
-        Return an INTEGER token value.
+        Processes factor production.
 
         factor  : (INTEGER | LPAR expr RPAR)
         """

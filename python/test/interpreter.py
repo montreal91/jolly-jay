@@ -109,3 +109,11 @@ class InterpreterTc(TestCase):
         x3 = randint(MIN, MAX)
         i = _make_interpreter(f"{x1} * ({x2} + {x3})")
         self.assertEqual(i.execute(), x1 * (x2 + x3))
+
+    def test_trailing_whitespace(self):
+        i = _make_interpreter("42 * (3 + 4 * (12 - 3))   ")
+        self.assertEqual(i.execute(), 1638)
+
+    def test_preceeding_whitespace(self):
+        i = _make_interpreter("     42 * (3 + 4 * (12 - 3))")
+        self.assertEqual(i.execute(), 1638)
