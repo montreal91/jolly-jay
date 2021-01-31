@@ -2,15 +2,16 @@
 from random import randint
 from unittest import TestCase
 
-from jaypi import Interpreter
 from lexer import Lexer
+from parser import Parser
+from interpreter import Interpreter
 
 
 MIN, MAX = 100, 1000
 
 
 def _make_interpreter(text):
-    return Interpreter(lexer=Lexer(text=text))
+    return Interpreter(parser=Parser(lexer=Lexer(text=text)))
 
 
 class InterpreterTc(TestCase):
@@ -109,3 +110,11 @@ class InterpreterTc(TestCase):
         x3 = randint(MIN, MAX)
         i = _make_interpreter(f"{x1} * ({x2} + {x3})")
         self.assertEqual(i.execute(), x1 * (x2 + x3))
+
+    def test_trailing_whitespace(self):
+        i = _make_interpreter("42 * (3 + 4 * (12 - 3))   ")
+        self.assertEqual(i.execute(), 1638)
+
+    def test_preceeding_whitespace(self):
+        i = _make_interpreter("     42 * (3 + 4 * (12 - 3))")
+        self.assertEqual(i.execute(), 1638)

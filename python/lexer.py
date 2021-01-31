@@ -1,14 +1,12 @@
-# 2021.01.28
-
 
 INTEGER = "INTEGER"
 PLUS = "PLUS"
 MINUS = "MINUS"
 MULTIPLY = "MULTIPLY"
 DIVIDE = "DIVIDE"
-EOF = "EOF"
 LPAR = "LPAR"
 RPAR = "RPAR"
+EOF = "EOF"
 
 OPERATORS = {
     "+": PLUS,
@@ -48,9 +46,9 @@ class Lexer:
         One token at a time.
         """
 
+        self._skip_whitespace()
         if not self._has_more():
             return Token(EOF, None)
-        self._skip_whitespace()
 
         current_char = self._get_current_char()
 
@@ -73,7 +71,7 @@ class Lexer:
         self._throw_error()
 
     def _skip_whitespace(self):
-        while self._get_current_char().isspace():
+        while self._has_more() and self._get_current_char().isspace():
             self._next_char()
 
     def _read_integer_token(self):
@@ -92,7 +90,9 @@ class Lexer:
         return t
 
     def _get_current_char(self):
-        return self._text[self._pos]
+        if self._pos < len(self._text):
+            return self._text[self._pos]
+        return None
 
     def _next_char(self):
         self._pos += 1
