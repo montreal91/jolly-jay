@@ -43,3 +43,6 @@ class Interpreter(NodeVisitor):
 
     def _visit_Number(self, node):
         return node.value
+
+    def _error(self):
+        raise Exception("Incorrect parse tree.")
