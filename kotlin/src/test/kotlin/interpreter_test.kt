@@ -136,4 +136,4 @@ class InterpreterTest {
 }
 
 
-private fun MakeInterpreter(text: String) = Interpreter(Lexer(text))
+private fun MakeInterpreter(text: String) = Interpreter(Parser(Lexer(text)))

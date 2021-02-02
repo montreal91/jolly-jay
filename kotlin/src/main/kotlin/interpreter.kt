@@ -1,8 +1,23 @@
 package interpreter
 
+import kotlin.collections.HashMap
+import kotlin.collections.hashMapOf
 
-class Interpreter(private val lexer: Lexer) {
-  private var currentToken: Token = lexer.GetNextToken()
+
+abstract class BaseVisitor {
+  protected fun Visit(node: AstNode) = when(node) {
+    is IntegerNode -> VisitIntegerNode(node)
+    is BinaryOperationNode -> VisitBinaryOperationNode(node)
+    else -> Error()
+  }
+
+  abstract protected fun VisitIntegerNode(node: IntegerNode): Int
+  abstract protected fun VisitBinaryOperationNode(node: BinaryOperationNode): Int
+  abstract protected fun Error(): Nothing
+}
+
+
+class Interpreter(private val parser: Parser) : BaseVisitor() {
 
   //
   // Execute arithmetic expression
@@ -10,96 +25,31 @@ class Interpreter(private val lexer: Lexer) {
   // IN : (561 - 5 * (52 + 59)) * (28 - 21)
   // OUT: 42
   //
-  fun Execute(): Int = Expr()
-
-  //
-  // Process expr rule
-  //
-  // expr    : operand ((PLUS | MINUS) operand) *
-  // operand : factor ((MUL | DIV) factor) *
-  // factor  : INTEGER | LPAR expr RPAR
-  //
-  private fun Expr(): Int {
-    var left = Operand()
-
-    while (currentToken.GetType() == PLUS || currentToken.GetType() == MINUS) {
-      val op = currentToken
-      when {
-        op.GetType().equals(PLUS) -> Eat(PLUS)
-        op.GetType().equals(MINUS) -> Eat(MINUS)
-        else -> Error()
-      }
-      val right = Operand()
-      left = when {
-        op.GetType().equals(PLUS) -> left + right
-        op.GetType().equals(MINUS) -> left - right
-        else -> Error()
-      }
-    }
-    return left
+  public fun Execute(): Int {
+    val tree = parser.Parse()
+    return Visit(tree)
   }
 
-  //
-  // Process operand rule
-  //
-  // operand : factor ((MUL | DIV) factor) *
-  // factor  : INTEGER | LPAR expr RPAR
-  //
-  private fun Operand(): Int {
-    var left = Factor()
-    while (currentToken.GetType() == MUL || currentToken.GetType() == DIV) {
-      val op = currentToken
-      when {
-        op.GetType().equals(MUL) -> Eat(MUL)
-        op.GetType().equals(DIV) -> Eat(DIV)
-        else -> Error()
-      }
-      val right = Operand()
-      left = when {
-        op.GetType().equals(MUL) -> left * right
-        op.GetType().equals(DIV) -> left / right
-        else -> Error()
-      }
-    }
-    return left
-  }
+  override protected fun VisitBinaryOperationNode(node: BinaryOperationNode): Int {
+    val left = Visit(node.GetLeft())
+    val right = Visit(node.GetRight())
+    val op = node.GetOp().GetType()
 
-  //
-  // Process factor rule
-  //
-  // factor  : INTEGER | LPAR expr RPAR
-  //
-  private fun Factor(): Int {
-    val token = currentToken
-    if (token.GetType() == INTEGER) {
-      Eat(INTEGER)
-      return when(token) {
-        is IntegerToken -> token.GetValue()
-        else -> Error()
-      }
-    }
-    if (token.GetType() == LPAR) {
-      Eat(LPAR)
-      val res = Expr()
-      Eat(RPAR)
-      return res
-    }
-    Error()
-  }
-
-  private fun Eat(tokenType: TokenType) {
-    if (currentToken.GetType() == tokenType) {
-      currentToken = lexer.GetNextToken()
-    }
-    else {
-      Error()
+    return when {
+      op == PLUS -> left + right
+      op == MINUS -> left - right
+      op == MUL -> left * right
+      op == DIV -> left / right
+      else -> Error()
     }
   }
 
-  private fun Error(): Nothing {
-    throw Exception("Syntax error.")
+  override protected fun VisitIntegerNode(node: IntegerNode) = node.GetValue()
+
+  override protected fun Error(): Nothing {
+    throw Exception("Traverse parse tree error.")
   }
 }
 
 
-fun MakeInterpreter(text: String) = Interpreter(Lexer(text))
+fun MakeInterpreter(text: String) = Interpreter(Parser(Lexer(text)))

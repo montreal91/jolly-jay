@@ -173,6 +173,32 @@ class LexerTest {
     token = lexer.GetNextToken()
     CheckToken(token, EOF, 0)
   }
+
+  @Test
+  fun TestTrailingWhitespace() {
+    val lexer = MakeLexer("    (  32 +  2 ) *  256   ")
+
+    var token: Token = lexer.GetNextToken()
+    CheckToken(token, LPAR, "(")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, INTEGER, 32)
+
+    token = lexer.GetNextToken()
+    CheckToken(token, PLUS, "+")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, INTEGER, 2)
+
+    token = lexer.GetNextToken()
+    CheckToken(token, RPAR, ")")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, MUL, "*")
+
+    token = lexer.GetNextToken()
+    CheckToken(token, INTEGER, 256)
+  }
 }
 
 
