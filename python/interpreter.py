@@ -44,5 +44,11 @@ class Interpreter(NodeVisitor):
     def _visit_Number(self, node):
         return node.value
 
+    def _visit_UnaryOperation(self, node):
+        val = self._visit(node.right)
+        if node.op.get_type() == MINUS:
+            return -val
+        return val
+
     def _error(self):
         raise Exception("Incorrect parse tree.")

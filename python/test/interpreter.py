@@ -87,7 +87,6 @@ class InterpreterTc(TestCase):
         i = _make_interpreter(f"{x1} / {x2} * {x3} / {x4}")
         self.assertEqual(i.execute(), x1 // x2 * x3 // x4)
 
-
     def test_plus_multiply_minus(self):
         i = _make_interpreter("4 + 5 * 8 - 2")
         self.assertEqual(i.execute(), 42)
@@ -118,3 +117,39 @@ class InterpreterTc(TestCase):
     def test_preceeding_whitespace(self):
         i = _make_interpreter("     42 * (3 + 4 * (12 - 3))")
         self.assertEqual(i.execute(), 1638)
+
+    def test_unary_plus(self):
+        i = _make_interpreter("5 + +5")
+        self.assertEqual(i.execute(), 10)
+
+    def test_unary_plus_rnd(self):
+        x1 = randint(MIN, MAX)
+        x2 = randint(MIN, MAX)
+        i = _make_interpreter(f"{x1} + +{x2}")
+        self.assertEqual(i.execute(), x1 + +x2)
+
+    def test_unary_minus(self):
+        i = _make_interpreter("32 + -8")
+        self.assertEqual(i.execute(), 24)
+
+    def test_unary_minus_rnd(self):
+        x1 = randint(MIN, MAX)
+        x2 = randint(MIN, MAX)
+        i = _make_interpreter(f"{x1} + -{x2}")
+        self.assertEqual(i.execute(), x1 +- x2)
+
+    def test_unary_triple_minus_rnd(self):
+        x1 = randint(MIN, MAX)
+        x2 = randint(MIN, MAX)
+        i = _make_interpreter(f"{x1} --- {x2}")
+        self.assertEqual(i.execute(), x1 - x2)
+
+    def test_multi_unary_rnd(self):
+        x1 = randint(MIN, MAX)
+        x2 = randint(MIN, MAX)
+        x3 = randint(MIN, MAX)
+        x4 = randint(MIN, MAX)
+        i = _make_interpreter(
+            f"{x1} + (-{x2}) + {x3} / (-{x4}) * (-{x3} + {x2})"
+        )
+        self.assertEqual(i.execute(), x1 + (-x2) + x3 // (-x4) * (-x3 + x2))
