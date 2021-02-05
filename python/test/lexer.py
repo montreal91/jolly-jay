@@ -56,15 +56,17 @@ class LexerTc(TestCase):
     def test_lexer_begin(self):
         lexer = _make_lexer("BEGIN")
         token = lexer.get_next_token()
+        from lexer import BEGIN
         self._check_token(
-            token=token, expected_type="BEGIN", expected_value="BEGIN"
+            token=token, expected_type=BEGIN, expected_value="BEGIN"
         )
 
     def test_lexer_begin(self):
         lexer = _make_lexer("END")
         token = lexer.get_next_token()
+        from lexer import END
         self._check_token(
-            token=token, expected_type="END", expected_value="END"
+            token=token, expected_type=END, expected_value="END"
         )
 
     def test_lexer_dot(self):

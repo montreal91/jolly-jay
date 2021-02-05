@@ -8,6 +8,8 @@ LPAR = "LPAR"
 RPAR = "RPAR"
 
 ID = "ID"
+BEGIN = "BEGIN"
+END = "END"
 ASSIGN = "ASSIGN"
 SEMI = "SEMI"
 DOT = "DOT"
@@ -42,8 +44,8 @@ class Token:
 
 
 RESERVED_KEYWORDS = {
-    "BEGIN": Token("BEGIN", "BEGIN"),
-    "END": Token("END", "END"),
+    "BEGIN": Token(BEGIN, "BEGIN"),
+    "END": Token(END, "END"),
 }
 
 

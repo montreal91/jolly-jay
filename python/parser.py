@@ -2,13 +2,17 @@
 from ast import BinaryOperation
 from ast import Number
 from ast import UnaryOperation
+from lexer import ASSIGN
+from lexer import BEGIN
+from lexer import END
+from lexer import DIVIDE
+from lexer import DOT
 from lexer import INTEGER
 from lexer import LPAR
-from lexer import RPAR
-from lexer import MULTIPLY
-from lexer import DIVIDE
-from lexer import PLUS
 from lexer import MINUS
+from lexer import MULTIPLY
+from lexer import PLUS
+from lexer import RPAR
 
 
 class Parser:
@@ -19,15 +23,95 @@ class Parser:
         self._current_token = self._lexer.get_next_token()
 
     def parse(self):
-        return self._expr()
+        node = self._program()
+        if self._current_token.get_type() != EOF:
+            self._error()
+        return node
+
+    def _program(self):
+        """
+        program : compound_statement DOT
+        """
+
+        node = self._compound_statement()
+        self.eat(DOT)
+        return node
+
+    def _compound_statement(self):
+        """
+        compound_statement: BEGIN statement_list END
+        """
+        self._eat(BEGIN)
+        nodes = self._statement_list()
+        self._eat(END)
+
+        root = Compound()
+        for node in nodes:
+            root.children.append(node)
+
+        return root
+
+    def _statement_list(self):
+        """
+        statement_list : statement
+                       | statement SEMI statement_list
+        """
+        node = self._statement()
+        results = [node]
+
+        while self._current_token.get_type() == SEMI:
+            self._eat(SEMI)
+            results.append(self._statement())
+
+        if self._current_token.get_type() == ID:
+            self._error()
+
+        return results
+
+    def _statement(self):
+        """
+        statement : compound_statement
+                  | assignment_statement
+                  |  empty
+        """
+
+        if self._current_token.get_type() == BEGIN:
+            node = self._compound_statement()
+        elif self._current_token.get_type() == ID:
+            node = self.assignment_statement()
+        else:
+            node = self.empty()
+        return node
+
+    def _assignment_statement(self):
+        """
+        assignment_statement : variable ASSIGN expr
+        """
+        left = self._variable()
+        token = self._current_token
+        self._eat(ASSIGN)
+        right = self._expr()
+        return Assign(left=left, op=token, right=right)
+
+    def _variable(self):
+        """
+        variable : ID
+        """
+        node = Var(self._current_token)
+        self._eat(ID)
+        return node
+
+    def _empty(self):
+        """
+        An empty production.
+        """
+        return NoOp()
 
     def _expr(self):
         """
         Process expr production.
 
         expr    : operand ((PLUS | MINUS) opeand)*
-        operand : factor ((MULTIPLY | DIVIDE) factor)*
-        factor  : (PLUS | MINUS) factor | INTEGER | LPAR expr RPAR
         """
 
         node = self._operand()
@@ -49,7 +133,6 @@ class Parser:
         Process operand production.
 
         operand : factor ((MULTIPLY | DIVIDE) factor)*
-        factor  : (PLUS | MINUS) factor | INTEGER | LPAR expr RPAR
         """
 
         node = self._factor()
@@ -70,7 +153,11 @@ class Parser:
         """
         Process factor prodution.
 
-        factor  : (PLUS | MINUS) factor | INTEGER | LPAR expr RPAR
+        factor : PLUS factor
+               | MINUS factor
+               | INTEGER
+               | LPAR expr RPAR
+               | variable
         """
         token = self._current_token
         if token.get_type() in (PLUS, MINUS):
@@ -84,6 +171,9 @@ class Parser:
             node = self._expr()
             self._eat(RPAR)
             return node
+        elif token.get_type() == ID:
+            # ???
+            return self._variable()
         self._error()
 
     def _eat(self, token_type):
