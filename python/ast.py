@@ -10,6 +10,12 @@ class BinaryOperation(Ast):
         self.right = right
 
 
+class UnaryOperation(Ast):
+    def __init__(self, op, right):
+        self.op = op
+        self.right = right
+
+
 class Number(Ast):
     def __init__(self, token):
         self.token = token

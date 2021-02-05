@@ -1,6 +1,7 @@
 
 from ast import BinaryOperation
 from ast import Number
+from ast import UnaryOperation
 from lexer import INTEGER
 from lexer import LPAR
 from lexer import RPAR
@@ -26,7 +27,7 @@ class Parser:
 
         expr    : operand ((PLUS | MINUS) opeand)*
         operand : factor ((MULTIPLY | DIVIDE) factor)*
-        factor  : INTEGER | LPAR expr RPAR
+        factor  : (PLUS | MINUS) factor | INTEGER | LPAR expr RPAR
         """
 
         node = self._operand()
@@ -48,7 +49,7 @@ class Parser:
         Process operand production.
 
         operand : factor ((MULTIPLY | DIVIDE) factor)*
-        factor  : INTEGER | LPAR expr RPAR
+        factor  : (PLUS | MINUS) factor | INTEGER | LPAR expr RPAR
         """
 
         node = self._factor()
@@ -69,10 +70,13 @@ class Parser:
         """
         Process factor prodution.
 
-        factor  : INTEGER | LPAR expr RPAR
+        factor  : (PLUS | MINUS) factor | INTEGER | LPAR expr RPAR
         """
         token = self._current_token
-        if token.get_type() == INTEGER:
+        if token.get_type() in (PLUS, MINUS):
+            self._eat(token.get_type())
+            return UnaryOperation(op=token, right=self._factor())
+        elif token.get_type() == INTEGER:
             self._eat(INTEGER)
             return Number(token)
         elif token.get_type() == LPAR:
