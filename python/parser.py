@@ -1,18 +1,25 @@
 
-from ast import BinaryOperation
-from ast import Number
-from ast import UnaryOperation
 from lexer import ASSIGN
 from lexer import BEGIN
 from lexer import END
 from lexer import DIVIDE
 from lexer import DOT
+from lexer import EOF
+from lexer import ID
 from lexer import INTEGER
 from lexer import LPAR
 from lexer import MINUS
 from lexer import MULTIPLY
 from lexer import PLUS
 from lexer import RPAR
+from lexer import SEMI
+from spi_ast import Assign
+from spi_ast import Compound
+from spi_ast import BinaryOperation
+from spi_ast import NoOp
+from spi_ast import Number
+from spi_ast import Var
+from spi_ast import UnaryOperation
 
 
 class Parser:
@@ -34,7 +41,7 @@ class Parser:
         """
 
         node = self._compound_statement()
-        self.eat(DOT)
+        self._eat(DOT)
         return node
 
     def _compound_statement(self):
@@ -78,9 +85,9 @@ class Parser:
         if self._current_token.get_type() == BEGIN:
             node = self._compound_statement()
         elif self._current_token.get_type() == ID:
-            node = self.assignment_statement()
+            node = self._assignment_statement()
         else:
-            node = self.empty()
+            node = self._empty()
         return node
 
     def _assignment_statement(self):

@@ -18,6 +18,7 @@ class NodeVisitor:
 class Interpreter(NodeVisitor):
     def __init__(self, parser):
         self._parser = parser
+        self.GLOBAL_SCOPE = dict()
 
     def execute(self):
         """
@@ -49,6 +50,25 @@ class Interpreter(NodeVisitor):
         if node.op.get_type() == MINUS:
             return -val
         return val
+
+    def _visit_Compound(self, node):
+        for child in node.children:
+            self._visit(child)
+
+    def _visit_NoOp(self, node):
+        pass
+
+    def _visit_Assign(self, node):
+        var_name = node.left.value
+        self.GLOBAL_SCOPE[var_name] = self._visit(node.right)
+
+    def _visit_Var(self, node):
+        var_name = node.value
+        val = self.GLOBAL_SCOPE.get(var_name)
+        if val is None:
+            raise NameError(repr(var_name))
+        else:
+            return val
 
     def _error(self):
         raise Exception("Incorrect parse tree.")
