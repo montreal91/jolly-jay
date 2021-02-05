@@ -1,4 +1,3 @@
-#2021.01.28
 
 from unittest import TestCase
 
@@ -53,6 +52,52 @@ class LexerTc(TestCase):
         token = lexer.get_next_token()
         from lexer import RPAR
         self._check_token(token=token, expected_type=RPAR, expected_value=")")
+
+    def test_lexer_begin(self):
+        lexer = _make_lexer("BEGIN")
+        token = lexer.get_next_token()
+        self._check_token(
+            token=token, expected_type="BEGIN", expected_value="BEGIN"
+        )
+
+    def test_lexer_begin(self):
+        lexer = _make_lexer("END")
+        token = lexer.get_next_token()
+        self._check_token(
+            token=token, expected_type="END", expected_value="END"
+        )
+
+    def test_lexer_dot(self):
+        lexer = _make_lexer(".")
+        token = lexer.get_next_token()
+        from  lexer import DOT
+        self._check_token(token=token, expected_type=DOT, expected_value=".")
+
+    def test_lexer_assign(self):
+        lexer = _make_lexer(":=")
+        token = lexer.get_next_token()
+        from lexer import ASSIGN
+        self._check_token(
+            token=token, expected_type=ASSIGN, expected_value=":="
+        )
+
+    def test_lexer_semi(self):
+        lexer = _make_lexer(";")
+        token = lexer.get_next_token()
+        from lexer import SEMI
+        self._check_token(token=token, expected_type=SEMI, expected_value=";")
+
+    def test_lexer_variable1(self):
+        lexer = _make_lexer("x")
+        token = lexer.get_next_token()
+        from lexer import ID
+        self._check_token(token=token, expected_type=ID, expected_value="x")
+
+    def test_lexer_variable2(self):
+        lexer = _make_lexer("vario")
+        token = lexer.get_next_token()
+        from lexer import ID
+        self._check_token(token=token, expected_type=ID, expected_value="vario")
 
     def test_lexer_expression(self):
         lexer = _make_lexer("10 + 11 - 12 * 13 / 2")
@@ -115,6 +160,51 @@ class LexerTc(TestCase):
             expected_value=None
         )
 
+    def test_begin_assign_end(self):
+        lexer = _make_lexer("BEGIN a := 2; END.")
+        from lexer import (
+            ASSIGN,
+            DOT,
+            ID,
+            INTEGER,
+            SEMI,
+            EOF,
+        )
+        self._check_token(
+            token=lexer.get_next_token(),
+            expected_type="BEGIN",
+            expected_value="BEGIN"
+        )
+        self._check_token(
+            token=lexer.get_next_token(),
+            expected_type=ID,
+            expected_value="a"
+        )
+        self._check_token(
+            token=lexer.get_next_token(),
+            expected_type=ASSIGN,
+            expected_value=":="
+        )
+        self._check_token(
+            token=lexer.get_next_token(),
+            expected_type=INTEGER,
+            expected_value=2
+        )
+        self._check_token(
+            token=lexer.get_next_token(),
+            expected_type=SEMI,
+            expected_value=";"
+        )
+        self._check_token(
+            token=lexer.get_next_token(),
+            expected_type="END",
+            expected_value="END"
+        )
+        self._check_token(
+            token=lexer.get_next_token(),
+            expected_type=DOT,
+            expected_value="."
+        )
 
     def _check_token(self, token, expected_type, expected_value):
         self.assertEqual(token.get_type(), expected_type)

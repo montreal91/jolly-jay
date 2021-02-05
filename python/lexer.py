@@ -6,6 +6,12 @@ MULTIPLY = "MULTIPLY"
 DIVIDE = "DIVIDE"
 LPAR = "LPAR"
 RPAR = "RPAR"
+
+ID = "ID"
+ASSIGN = "ASSIGN"
+SEMI = "SEMI"
+DOT = "DOT"
+
 EOF = "EOF"
 
 OPERATORS = {
@@ -14,6 +20,8 @@ OPERATORS = {
     "*": MULTIPLY,
     "/": DIVIDE,
 }
+
+
 
 class Token:
     def __init__(self, type_, value):
@@ -31,6 +39,12 @@ class Token:
 
     def __repr__(self):
         return self.__str__()
+
+
+RESERVED_KEYWORDS = {
+    "BEGIN": Token("BEGIN", "BEGIN"),
+    "END": Token("END", "END"),
+}
 
 
 class Lexer:
@@ -68,6 +82,22 @@ class Lexer:
             self._next_char()
             return token
 
+        if self._get_current_char().isalpha():
+            return self._read_id_token()
+
+        if self._get_current_char() == ":" and self._peek() == "=":
+            self._next_char()
+            self._next_char()
+            return Token(ASSIGN, ":=")
+
+        if self._get_current_char() == ";":
+            self._next_char()
+            return Token(SEMI, ";")
+
+        if self._get_current_char() == ".":
+            self._next_char()
+            return Token(DOT, ".")
+
         self._throw_error()
 
     def _skip_whitespace(self):
@@ -80,6 +110,14 @@ class Lexer:
             val += self._get_current_char()
             self._next_char()
         return Token(INTEGER, int(val))
+
+    def _read_id_token(self):
+        val = ""
+        while self._has_more() and self._get_current_char().isalnum():
+            val += self._get_current_char()
+            self._next_char()
+        token = RESERVED_KEYWORDS.get(val, Token(ID, val))
+        return token
 
     def _read_operator_token(self):
         t = Token(
@@ -99,6 +137,12 @@ class Lexer:
 
     def _has_more(self):
         return self._pos < len(self._text)
+
+    def _peek(self):
+        pp = self._pos + 1
+        if pp < len(self._text):
+            return self._text[pp]
+        return None
 
     def _throw_error(self):
         raise Exception("Unexpected character")
