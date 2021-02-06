@@ -129,6 +129,15 @@ class LexerTc(TestCase):
             token=token, expected_type=TokenType.ID, expected_value="vario"
         )
 
+    def test_integer_div(self):
+        lexer = _make_lexer("DIV")
+        token = lexer.get_next_token()
+        self._check_token(
+            token=token,
+            expected_type=TokenType.INT_DIVIDE,
+            expected_value="DIV"
+        )
+
     def test_lexer_expression(self):
         lexer = _make_lexer("10 + 11 - 12 * 13 / 2")
         self._check_token(

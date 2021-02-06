@@ -1,18 +1,4 @@
 
-# from lexer import ASSIGN
-# from lexer import BEGIN
-# from lexer import END
-# from lexer import DIVIDE
-# from lexer import DOT
-# from lexer import EOF
-# from lexer import ID
-# from lexer import INTEGER
-# from lexer import LPAR
-# from lexer import MINUS
-# from lexer import MULTIPLY
-# from lexer import PLUS
-# from lexer import RPAR
-# from lexer import SEMI
 from lexer import TokenType
 from spi_ast import Assign
 from spi_ast import Compound
@@ -145,12 +131,15 @@ class Parser:
 
         node = self._factor()
 
-        while self._current_token.get_type() in (TokenType.MULTIPLY, TokenType.DIVIDE):
+        types = (TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.INT_DIVIDE)
+        while self._current_token.get_type() in (types):
             token = self._current_token
             if token.get_type() == TokenType.MULTIPLY:
                 self._eat(TokenType.MULTIPLY)
             elif token.get_type() == TokenType.DIVIDE:
                 self._eat(TokenType.DIVIDE)
+            elif token.get_type() == TokenType.INT_DIVIDE:
+                self._eat(TokenType.INT_DIVIDE)
             else:
                 self._error()
 

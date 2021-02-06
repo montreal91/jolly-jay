@@ -8,6 +8,7 @@ class TokenType(Enum):
     MINUS = "MINUS"
     MULTIPLY = "MULTIPLY"
     DIVIDE = "DIVIDE"
+    INT_DIVIDE = "INT_DIVIDE"
     LPAR = "LPAR"
     RPAR = "RPAR"
 
@@ -50,6 +51,7 @@ class Token:
 RESERVED_KEYWORDS = {
     "begin": Token(TokenType.BEGIN, "BEGIN"),
     "end": Token(TokenType.END, "END"),
+    "div": Token(TokenType.INT_DIVIDE, "DIV"),
 }
 
 
@@ -89,7 +91,7 @@ class Lexer:
             return token
 
         if self._get_current_char().isalpha():
-            return self._read_id_token()
+            return self._read_alphanumeric_token()
 
         if self._get_current_char() == ":" and self._peek() == "=":
             self._next_char()
@@ -117,7 +119,7 @@ class Lexer:
             self._next_char()
         return Token(TokenType.INTEGER, int(val))
 
-    def _read_id_token(self):
+    def _read_alphanumeric_token(self):
         val = ""
         while self._has_more() and self._get_current_char().isalnum():
             val += self._get_current_char()

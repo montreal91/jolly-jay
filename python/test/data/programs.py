@@ -28,3 +28,17 @@ Begin
     x := 11;
 END.
 """
+
+program1_integer_div = """\
+Begin
+
+    begin
+        Number := 2;
+        a := NUMBER;
+        b := 10 * a + 10 * number div 4;
+        c := A - - B
+    end;
+
+    x := 11;
+END.
+"""
