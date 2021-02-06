@@ -1,26 +1,31 @@
 
-INTEGER = "INTEGER"
-PLUS = "PLUS"
-MINUS = "MINUS"
-MULTIPLY = "MULTIPLY"
-DIVIDE = "DIVIDE"
-LPAR = "LPAR"
-RPAR = "RPAR"
+from enum import Enum
 
-ID = "ID"
-BEGIN = "BEGIN"
-END = "END"
-ASSIGN = "ASSIGN"
-SEMI = "SEMI"
-DOT = "DOT"
 
-EOF = "EOF"
+class TokenType(Enum):
+    INTEGER = "INTEGER"
+    PLUS = "PLUS"
+    MINUS = "MINUS"
+    MULTIPLY = "MULTIPLY"
+    DIVIDE = "DIVIDE"
+    LPAR = "LPAR"
+    RPAR = "RPAR"
+
+    ID = "ID"
+    BEGIN = "BEGIN"
+    END = "END"
+    ASSIGN = "ASSIGN"
+    SEMI = "SEMI"
+    DOT = "DOT"
+
+    EOF = "EOF"
+
 
 OPERATORS = {
-    "+": PLUS,
-    "-": MINUS,
-    "*": MULTIPLY,
-    "/": DIVIDE,
+    "+": TokenType.PLUS,
+    "-": TokenType.MINUS,
+    "*": TokenType.MULTIPLY,
+    "/": TokenType.DIVIDE,
 }
 
 
@@ -37,15 +42,15 @@ class Token:
         return self._value
 
     def __str__(self):
-        return f"Token({self._type}, {self._value})"
+        return f"Token({self._type.value()}, {self._value})"
 
     def __repr__(self):
         return self.__str__()
 
 
 RESERVED_KEYWORDS = {
-    "BEGIN": Token(BEGIN, "BEGIN"),
-    "END": Token(END, "END"),
+    "BEGIN": Token(TokenType.BEGIN, "BEGIN"),
+    "END": Token(TokenType.END, "END"),
 }
 
 
@@ -64,7 +69,7 @@ class Lexer:
 
         self._skip_whitespace()
         if not self._has_more():
-            return Token(EOF, None)
+            return Token(TokenType.EOF, None)
 
         current_char = self._get_current_char()
 
@@ -75,12 +80,12 @@ class Lexer:
             return self._read_operator_token()
 
         if current_char == "(":
-            token = Token(LPAR, "(")
+            token = Token(TokenType.LPAR, "(")
             self._next_char()
             return token
 
         if current_char == ")":
-            token = Token(RPAR, ")")
+            token = Token(TokenType.RPAR, ")")
             self._next_char()
             return token
 
@@ -90,15 +95,15 @@ class Lexer:
         if self._get_current_char() == ":" and self._peek() == "=":
             self._next_char()
             self._next_char()
-            return Token(ASSIGN, ":=")
+            return Token(TokenType.ASSIGN, ":=")
 
         if self._get_current_char() == ";":
             self._next_char()
-            return Token(SEMI, ";")
+            return Token(TokenType.SEMI, ";")
 
         if self._get_current_char() == ".":
             self._next_char()
-            return Token(DOT, ".")
+            return Token(TokenType.DOT, ".")
 
         self._throw_error()
 
@@ -111,14 +116,14 @@ class Lexer:
         while self._has_more() and self._get_current_char().isdigit():
             val += self._get_current_char()
             self._next_char()
-        return Token(INTEGER, int(val))
+        return Token(TokenType.INTEGER, int(val))
 
     def _read_id_token(self):
         val = ""
         while self._has_more() and self._get_current_char().isalnum():
             val += self._get_current_char()
             self._next_char()
-        token = RESERVED_KEYWORDS.get(val, Token(ID, val))
+        token = RESERVED_KEYWORDS.get(val, Token(TokenType.ID, val))
         return token
 
     def _read_operator_token(self):

@@ -1,18 +1,19 @@
 
-from lexer import ASSIGN
-from lexer import BEGIN
-from lexer import END
-from lexer import DIVIDE
-from lexer import DOT
-from lexer import EOF
-from lexer import ID
-from lexer import INTEGER
-from lexer import LPAR
-from lexer import MINUS
-from lexer import MULTIPLY
-from lexer import PLUS
-from lexer import RPAR
-from lexer import SEMI
+# from lexer import ASSIGN
+# from lexer import BEGIN
+# from lexer import END
+# from lexer import DIVIDE
+# from lexer import DOT
+# from lexer import EOF
+# from lexer import ID
+# from lexer import INTEGER
+# from lexer import LPAR
+# from lexer import MINUS
+# from lexer import MULTIPLY
+# from lexer import PLUS
+# from lexer import RPAR
+# from lexer import SEMI
+from lexer import TokenType
 from spi_ast import Assign
 from spi_ast import Compound
 from spi_ast import BinaryOperation
@@ -31,7 +32,7 @@ class Parser:
 
     def parse(self):
         node = self._program()
-        if self._current_token.get_type() != EOF:
+        if self._current_token.get_type() != TokenType.EOF:
             self._error()
         return node
 
@@ -41,16 +42,16 @@ class Parser:
         """
 
         node = self._compound_statement()
-        self._eat(DOT)
+        self._eat(TokenType.DOT)
         return node
 
     def _compound_statement(self):
         """
         compound_statement: BEGIN statement_list END
         """
-        self._eat(BEGIN)
+        self._eat(TokenType.BEGIN)
         nodes = self._statement_list()
-        self._eat(END)
+        self._eat(TokenType.END)
 
         root = Compound()
         for node in nodes:
@@ -66,11 +67,11 @@ class Parser:
         node = self._statement()
         results = [node]
 
-        while self._current_token.get_type() == SEMI:
-            self._eat(SEMI)
+        while self._current_token.get_type() == TokenType.SEMI:
+            self._eat(TokenType.SEMI)
             results.append(self._statement())
 
-        if self._current_token.get_type() == ID:
+        if self._current_token.get_type() == TokenType.ID:
             self._error()
 
         return results
@@ -82,9 +83,9 @@ class Parser:
                   |  empty
         """
 
-        if self._current_token.get_type() == BEGIN:
+        if self._current_token.get_type() == TokenType.BEGIN:
             node = self._compound_statement()
-        elif self._current_token.get_type() == ID:
+        elif self._current_token.get_type() == TokenType.ID:
             node = self._assignment_statement()
         else:
             node = self._empty()
@@ -96,7 +97,7 @@ class Parser:
         """
         left = self._variable()
         token = self._current_token
-        self._eat(ASSIGN)
+        self._eat(TokenType.ASSIGN)
         right = self._expr()
         return Assign(left=left, op=token, right=right)
 
@@ -105,7 +106,7 @@ class Parser:
         variable : ID
         """
         node = Var(self._current_token)
-        self._eat(ID)
+        self._eat(TokenType.ID)
         return node
 
     def _empty(self):
@@ -123,12 +124,12 @@ class Parser:
 
         node = self._operand()
 
-        while self._current_token.get_type() in (PLUS, MINUS):
+        while self._current_token.get_type() in (TokenType.PLUS, TokenType.MINUS):
             token = self._current_token
-            if token.get_type() == PLUS:
-                self._eat(PLUS)
-            elif token.get_type() == MINUS:
-                self._eat(MINUS)
+            if token.get_type() == TokenType.PLUS:
+                self._eat(TokenType.PLUS)
+            elif token.get_type() == TokenType.MINUS:
+                self._eat(TokenType.MINUS)
             else:
                 self._error()
 
@@ -144,12 +145,12 @@ class Parser:
 
         node = self._factor()
 
-        while self._current_token.get_type() in (MULTIPLY, DIVIDE):
+        while self._current_token.get_type() in (TokenType.MULTIPLY, TokenType.DIVIDE):
             token = self._current_token
-            if token.get_type() == MULTIPLY:
-                self._eat(MULTIPLY)
-            elif token.get_type() == DIVIDE:
-                self._eat(DIVIDE)
+            if token.get_type() == TokenType.MULTIPLY:
+                self._eat(TokenType.MULTIPLY)
+            elif token.get_type() == TokenType.DIVIDE:
+                self._eat(TokenType.DIVIDE)
             else:
                 self._error()
 
@@ -167,18 +168,18 @@ class Parser:
                | variable
         """
         token = self._current_token
-        if token.get_type() in (PLUS, MINUS):
+        if token.get_type() in (TokenType.PLUS, TokenType.MINUS):
             self._eat(token.get_type())
             return UnaryOperation(op=token, right=self._factor())
-        elif token.get_type() == INTEGER:
-            self._eat(INTEGER)
+        elif token.get_type() == TokenType.INTEGER:
+            self._eat(TokenType.INTEGER)
             return Number(token)
-        elif token.get_type() == LPAR:
-            self._eat(LPAR)
+        elif token.get_type() == TokenType.LPAR:
+            self._eat(TokenType.LPAR)
             node = self._expr()
-            self._eat(RPAR)
+            self._eat(TokenType.RPAR)
             return node
-        elif token.get_type() == ID:
+        elif token.get_type() == TokenType.ID:
             # ???
             return self._variable()
         self._error()

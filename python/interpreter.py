@@ -1,8 +1,10 @@
 
-from lexer import PLUS
-from lexer import MINUS
-from lexer import MULTIPLY
-from lexer import DIVIDE
+# from lexer import PLUS
+# from lexer import MINUS
+# from lexer import MULTIPLY
+# from lexer import DIVIDE
+
+from lexer import TokenType
 
 
 class NodeVisitor:
@@ -31,13 +33,13 @@ class Interpreter(NodeVisitor):
         return self._visit(tree)
 
     def _visit_BinaryOperation(self, node):
-        if node.op.get_type() == PLUS:
+        if node.op.get_type() == TokenType.PLUS:
             return self._visit(node.left) + self._visit(node.right)
-        elif node.op.get_type() == MINUS:
+        elif node.op.get_type() == TokenType.MINUS:
             return self._visit(node.left) - self._visit(node.right)
-        elif node.op.get_type() == MULTIPLY:
+        elif node.op.get_type() == TokenType.MULTIPLY:
             return self._visit(node.left) * self._visit(node.right)
-        elif node.op.get_type() == DIVIDE:
+        elif node.op.get_type() == TokenType.DIVIDE:
             return self._visit(node.left) // self._visit(node.right)
         else:
             self._error()
@@ -47,7 +49,7 @@ class Interpreter(NodeVisitor):
 
     def _visit_UnaryOperation(self, node):
         val = self._visit(node.right)
-        if node.op.get_type() == MINUS:
+        if node.op.get_type() == TokenType.MINUS:
             return -val
         return val
 
