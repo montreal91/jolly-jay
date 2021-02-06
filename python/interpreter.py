@@ -1,8 +1,5 @@
 
-from lexer import PLUS
-from lexer import MINUS
-from lexer import MULTIPLY
-from lexer import DIVIDE
+from lexer import TokenType
 
 
 class NodeVisitor:
@@ -18,6 +15,7 @@ class NodeVisitor:
 class Interpreter(NodeVisitor):
     def __init__(self, parser):
         self._parser = parser
+        self.GLOBAL_SCOPE = dict()
 
     def execute(self):
         """
@@ -25,18 +23,21 @@ class Interpreter(NodeVisitor):
 
         Input: 42 * (3 + 4 * (12 - 3)) - (256 - 128 - 16 - 8 - 4) * (8 + 2)
         Expected ouptut: 638
+        (At this point integer and float division work the same way).
         """
         tree = self._parser.parse()
         return self._visit(tree)
 
     def _visit_BinaryOperation(self, node):
-        if node.op.get_type() == PLUS:
+        if node.op.get_type() == TokenType.PLUS:
             return self._visit(node.left) + self._visit(node.right)
-        elif node.op.get_type() == MINUS:
+        elif node.op.get_type() == TokenType.MINUS:
             return self._visit(node.left) - self._visit(node.right)
-        elif node.op.get_type() == MULTIPLY:
+        elif node.op.get_type() == TokenType.MULTIPLY:
             return self._visit(node.left) * self._visit(node.right)
-        elif node.op.get_type() == DIVIDE:
+        elif node.op.get_type() == TokenType.DIVIDE:
+            return self._visit(node.left) // self._visit(node.right)
+        elif node.op.get_type() == TokenType.INT_DIVIDE:
             return self._visit(node.left) // self._visit(node.right)
         else:
             self._error()
@@ -46,9 +47,28 @@ class Interpreter(NodeVisitor):
 
     def _visit_UnaryOperation(self, node):
         val = self._visit(node.right)
-        if node.op.get_type() == MINUS:
+        if node.op.get_type() == TokenType.MINUS:
             return -val
         return val
+
+    def _visit_Compound(self, node):
+        for child in node.children:
+            self._visit(child)
+
+    def _visit_NoOp(self, node):
+        pass
+
+    def _visit_Assign(self, node):
+        var_name = node.left.value
+        self.GLOBAL_SCOPE[var_name] = self._visit(node.right)
+
+    def _visit_Var(self, node):
+        var_name = node.value
+        val = self.GLOBAL_SCOPE.get(var_name)
+        if val is None:
+            raise NameError(repr(var_name))
+        else:
+            return val
 
     def _error(self):
         raise Exception("Incorrect parse tree.")
