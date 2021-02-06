@@ -42,3 +42,9 @@ Begin
     x := 11;
 END.
 """
+
+program_with_underscore_id = """
+BEGIN
+    _x_ := 42
+END.
+"""

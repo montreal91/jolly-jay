@@ -129,6 +129,22 @@ class LexerTc(TestCase):
             token=token, expected_type=TokenType.ID, expected_value="vario"
         )
 
+    def test_variable_starts_with_underscore(self):
+        lexer = _make_lexer("_vario")
+        self._check_token(
+            token=lexer.get_next_token(),
+            expected_type=TokenType.ID,
+            expected_value="_vario"
+        )
+
+    def test_variable_ends_with_underscore(self):
+        lexer = _make_lexer("vario_")
+        self._check_token(
+            token=lexer.get_next_token(),
+            expected_type=TokenType.ID,
+            expected_value="vario_"
+        )
+
     def test_integer_div(self):
         lexer = _make_lexer("DIV")
         token = lexer.get_next_token()

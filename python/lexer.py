@@ -90,7 +90,7 @@ class Lexer:
             self._next_char()
             return token
 
-        if self._get_current_char().isalpha():
+        if self._is_alpha_underscore():
             return self._read_alphanumeric_token()
 
         if self._get_current_char() == ":" and self._peek() == "=":
@@ -121,7 +121,7 @@ class Lexer:
 
     def _read_alphanumeric_token(self):
         val = ""
-        while self._has_more() and self._get_current_char().isalnum():
+        while self._has_more() and self._is_good_id_char():
             val += self._get_current_char()
             self._next_char()
         val = val.lower()
@@ -146,6 +146,16 @@ class Lexer:
 
     def _has_more(self):
         return self._pos < len(self._text)
+
+    def _is_alpha_underscore(self):
+        if self._get_current_char().isalpha():
+            return True
+        return self._get_current_char() == "_"
+
+    def _is_good_id_char(self):
+        if self._get_current_char().isalnum():
+            return True
+        return self._get_current_char() == "_"
 
     def _peek(self):
         pp = self._pos + 1

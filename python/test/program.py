@@ -47,6 +47,13 @@ class ProgramTc(TestCase):
         self.assertEqual(spi.GLOBAL_SCOPE["x"], 11)
         self.assertEqual(spi.GLOBAL_SCOPE["number"], 2)
 
+    def test_program_underscore_id(self):
+        from test.data.programs import program_with_underscore_id
+        spi = _make_interpreter(text=program_with_underscore_id)
+        spi.execute()
+
+        self.assertEqual(spi.GLOBAL_SCOPE["_x_"], 42)
+
 
 def _make_interpreter(text):
     return Interpreter(parser=Parser(lexer=Lexer(text=text)))
