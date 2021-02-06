@@ -66,8 +66,22 @@ class LexerTc(TestCase):
             token=token, expected_type=TokenType.BEGIN, expected_value="BEGIN"
         )
 
-    def test_lexer_begin(self):
+    def test_lexer_begin_case_insensitive(self):
+        lexer = _make_lexer("BeGiN")
+        token = lexer.get_next_token()
+        self._check_token(
+            token=token, expected_type=TokenType.BEGIN, expected_value="BEGIN"
+        )
+
+    def test_lexer_end(self):
         lexer = _make_lexer("END")
+        token = lexer.get_next_token()
+        self._check_token(
+            token=token, expected_type=TokenType.END, expected_value="END"
+        )
+
+    def test_lexer_end_case_insensitive(self):
+        lexer = _make_lexer("End")
         token = lexer.get_next_token()
         self._check_token(
             token=token, expected_type=TokenType.END, expected_value="END"
@@ -103,6 +117,13 @@ class LexerTc(TestCase):
 
     def test_lexer_variable2(self):
         lexer = _make_lexer("vario")
+        token = lexer.get_next_token()
+        self._check_token(
+            token=token, expected_type=TokenType.ID, expected_value="vario"
+        )
+
+    def test_lexer_variable2_case_insensitiviy(self):
+        lexer = _make_lexer("vArIO")
         token = lexer.get_next_token()
         self._check_token(
             token=token, expected_type=TokenType.ID, expected_value="vario"

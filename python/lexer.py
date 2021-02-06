@@ -29,7 +29,6 @@ OPERATORS = {
 }
 
 
-
 class Token:
     def __init__(self, type_, value):
         self._type = type_
@@ -49,8 +48,8 @@ class Token:
 
 
 RESERVED_KEYWORDS = {
-    "BEGIN": Token(TokenType.BEGIN, "BEGIN"),
-    "END": Token(TokenType.END, "END"),
+    "begin": Token(TokenType.BEGIN, "BEGIN"),
+    "end": Token(TokenType.END, "END"),
 }
 
 
@@ -123,6 +122,7 @@ class Lexer:
         while self._has_more() and self._get_current_char().isalnum():
             val += self._get_current_char()
             self._next_char()
+        val = val.lower()
         token = RESERVED_KEYWORDS.get(val, Token(TokenType.ID, val))
         return token
 
