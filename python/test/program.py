@@ -1,11 +1,13 @@
 
 from unittest import TestCase
+from unittest import skip
 
 from lexer import Lexer
 from parser import Parser
 from interpreter import Interpreter
 
 
+@skip
 class ProgramTc(TestCase):
     def test_program0(self):
         from test.data.programs import program0
