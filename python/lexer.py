@@ -3,31 +3,31 @@ from enum import Enum
 
 
 class TokenType(Enum):
+    ASSIGN = "ASSIGN"
+    BEGIN = "BEGIN"
+    COLON = "COLON"
+    COMMA = "COMMA"
+    DOT = "DOT"
+    END = "END"
+    ID = "ID"
     INTEGER = "INTEGER"
-    PLUS = "PLUS"
+    INTEGER_DIV = "INT_DIV"
+    INTEGER_LITERAL = "INTEGER_LITERAL"
+    LPAR = "LPAR"
     MINUS = "MINUS"
     MULTIPLY = "MULTIPLY"
-    DIVIDE = "DIVIDE"
-    INT_DIVIDE = "INT_DIVIDE"
-    LPAR = "LPAR"
+    PLUS = "PLUS"
+    PROGRAM = "PROGRAM"
+    REAL = "REAL"
+    REAL_DIV = "REAL_DIV"
+    REAL_LITERAL = "REAL_LITERAL"
     RPAR = "RPAR"
-
-    ID = "ID"
-    BEGIN = "BEGIN"
-    END = "END"
-    ASSIGN = "ASSIGN"
     SEMI = "SEMI"
-    DOT = "DOT"
+    VAR = "VAR"
 
     EOF = "EOF"
 
 
-OPERATORS = {
-    "+": TokenType.PLUS,
-    "-": TokenType.MINUS,
-    "*": TokenType.MULTIPLY,
-    "/": TokenType.DIVIDE,
-}
 
 
 class Token:
@@ -48,10 +48,28 @@ class Token:
         return self.__str__()
 
 
+ONE_SYMBOL_TOKENS = {
+    "+": Token(TokenType.PLUS, "+"),
+    "-": Token(TokenType.MINUS, "-"),
+    "*": Token(TokenType.MULTIPLY, "*"),
+    "/": Token(TokenType.REAL_DIV, "/"),
+    "(": Token(TokenType.LPAR, "("),
+    ")": Token(TokenType.RPAR, ")"),
+    ";": Token(TokenType.SEMI, ";"),
+    ":": Token(TokenType.COLON, ":"),
+    ",": Token(TokenType.COMMA, ","),
+    ".": Token(TokenType.DOT, ".")
+}
+
+
 RESERVED_KEYWORDS = {
+    "program": Token(TokenType.PROGRAM, "PROGRAM"),
+    "var": Token(TokenType.VAR, "VAR"),
+    "integer": Token(TokenType.INTEGER, "INTEGER"),
+    "real": Token(TokenType.REAL, "REAL"),
     "begin": Token(TokenType.BEGIN, "BEGIN"),
     "end": Token(TokenType.END, "END"),
-    "div": Token(TokenType.INT_DIVIDE, "DIV"),
+    "div": Token(TokenType.INTEGER_DIV, "DIV"),
 }
 
 
@@ -69,26 +87,16 @@ class Lexer:
         """
 
         self._skip_whitespace()
+
+        while self._get_current_char() == "{":
+            self._skip_comment()
         if not self._has_more():
             return Token(TokenType.EOF, None)
 
         current_char = self._get_current_char()
 
         if current_char.isdigit():
-            return self._read_integer_token()
-
-        if current_char in OPERATORS:
-            return self._read_operator_token()
-
-        if current_char == "(":
-            token = Token(TokenType.LPAR, "(")
-            self._next_char()
-            return token
-
-        if current_char == ")":
-            token = Token(TokenType.RPAR, ")")
-            self._next_char()
-            return token
+            return self._read_number_literal_token()
 
         if self._is_alpha_underscore():
             return self._read_alphanumeric_token()
@@ -98,26 +106,36 @@ class Lexer:
             self._next_char()
             return Token(TokenType.ASSIGN, ":=")
 
-        if self._get_current_char() == ";":
-            self._next_char()
-            return Token(TokenType.SEMI, ";")
+        if current_char in ONE_SYMBOL_TOKENS:
+            return self._read_operator_token()
 
-        if self._get_current_char() == ".":
-            self._next_char()
-            return Token(TokenType.DOT, ".")
-
-        self._throw_error()
+        self._throw_error(current_char)
 
     def _skip_whitespace(self):
         while self._has_more() and self._get_current_char().isspace():
             self._next_char()
 
-    def _read_integer_token(self):
+    def _skip_comment(self):
+        while self._has_more() and self._get_current_char() != "}":
+            self._next_char()
+        self._next_char()
+        self._skip_whitespace()
+
+    def _read_number_literal_token(self):
         val = ""
         while self._has_more() and self._get_current_char().isdigit():
             val += self._get_current_char()
             self._next_char()
-        return Token(TokenType.INTEGER, int(val))
+
+        if self._get_current_char() != ".":
+            return Token(TokenType.INTEGER_LITERAL, int(val))
+
+        val += self._get_current_char()
+        self._next_char()
+        while self._has_more() and self._get_current_char().isdigit():
+            val += self._get_current_char()
+            self._next_char()
+        return Token(TokenType.REAL_LITERAL, float(val))
 
     def _read_alphanumeric_token(self):
         val = ""
@@ -129,12 +147,9 @@ class Lexer:
         return token
 
     def _read_operator_token(self):
-        t = Token(
-            OPERATORS[self._get_current_char()],
-            self._get_current_char()
-        )
+        token = ONE_SYMBOL_TOKENS[self._get_current_char()]
         self._next_char()
-        return t
+        return token
 
     def _get_current_char(self):
         if self._pos < len(self._text):
@@ -163,5 +178,5 @@ class Lexer:
             return self._text[pp]
         return None
 
-    def _throw_error(self):
-        raise Exception("Unexpected character")
+    def _throw_error(self, char):
+        raise Exception(f"Unexpected character: {char}")
