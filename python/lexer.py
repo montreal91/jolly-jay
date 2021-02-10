@@ -88,7 +88,7 @@ class Lexer:
 
         self._skip_whitespace()
 
-        if self._get_current_char() == "{":
+        while self._get_current_char() == "{":
             self._skip_comment()
         if not self._has_more():
             return Token(TokenType.EOF, None)
@@ -109,7 +109,7 @@ class Lexer:
         if current_char in ONE_SYMBOL_TOKENS:
             return self._read_operator_token()
 
-        self._throw_error()
+        self._throw_error(current_char)
 
     def _skip_whitespace(self):
         while self._has_more() and self._get_current_char().isspace():
@@ -178,5 +178,5 @@ class Lexer:
             return self._text[pp]
         return None
 
-    def _throw_error(self):
-        raise Exception("Unexpected character")
+    def _throw_error(self, char):
+        raise Exception(f"Unexpected character: {char}")

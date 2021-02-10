@@ -28,6 +28,22 @@ class Interpreter(NodeVisitor):
         tree = self._parser.parse()
         return self._visit(tree)
 
+    def _visit_Program(self, node):
+        self._visit(node.block)
+
+    def _visit_Block(self, node):
+        for decl in node.declarations:
+            self._visit(decl)
+        self._visit(node.compound_statement)
+
+    def _visit_VarDeclaration(self, node):
+        # Do nothing
+        pass
+
+    def _visit_Type(self, node):
+        # Do nothing
+        pass
+
     def _visit_BinaryOperation(self, node):
         if node.op.get_type() == TokenType.PLUS:
             return self._visit(node.left) + self._visit(node.right)
@@ -35,10 +51,10 @@ class Interpreter(NodeVisitor):
             return self._visit(node.left) - self._visit(node.right)
         elif node.op.get_type() == TokenType.MULTIPLY:
             return self._visit(node.left) * self._visit(node.right)
-        elif node.op.get_type() == TokenType.DIVIDE:
+        elif node.op.get_type() == TokenType.INTEGER_DIV:
             return self._visit(node.left) // self._visit(node.right)
-        elif node.op.get_type() == TokenType.INT_DIVIDE:
-            return self._visit(node.left) // self._visit(node.right)
+        elif node.op.get_type() == TokenType.REAL_DIV:
+            return self._visit(node.left) / self._visit(node.right)
         else:
             self._error()
 

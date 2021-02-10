@@ -1,11 +1,15 @@
 
 from lexer import TokenType
 from spi_ast import Assign
+from spi_ast import Block
 from spi_ast import Compound
 from spi_ast import BinaryOperation
 from spi_ast import NoOp
 from spi_ast import Number
+from spi_ast import Program
 from spi_ast import Var
+from spi_ast import VarDeclaration
+from spi_ast import Type
 from spi_ast import UnaryOperation
 
 
@@ -24,12 +28,73 @@ class Parser:
 
     def _program(self):
         """
-        program : compound_statement DOT
+        program : PROGRAM variable SEMI block DOT
         """
-
-        node = self._compound_statement()
+        self._eat(TokenType.PROGRAM)
+        var_node = self._variable()
+        prog_name = var_node.value
+        self._eat(TokenType.SEMI)
+        block_node = self._block()
+        program_node = Program(name=prog_name, block=block_node)
         self._eat(TokenType.DOT)
-        return node
+        return program_node
+
+    def _block(self):
+        """
+        block : declarations compound_statement
+        """
+        declaration_nodes = self._declarations()
+        compound_statement_node = self._compound_statement()
+        return Block(
+            declarations=declaration_nodes,
+            compound_statement=compound_statement_node
+        )
+
+    def _declarations(self):
+        """
+        declararions : VAR (variable_declaration SEMI)+
+                     | empty
+        """
+        declarations = []
+        if self._current_token.get_type() == TokenType.VAR:
+            self._eat(TokenType.VAR)
+            while self._current_token.get_type() == TokenType.ID:
+                var_decl = self._variable_declaration()
+                declarations.extend(var_decl)
+                self._eat(TokenType.SEMI)
+        return declarations
+
+    def _variable_declaration(self):
+        """
+        variable_declaration : ID (COMMA ID)* COLON type_spec
+        """
+        var_nodes = [Var(self._current_token)] # first ID
+        self._eat(TokenType.ID)
+
+        while self._current_token.get_type() == TokenType.COMMA:
+            self._eat(TokenType.COMMA)
+            var_nodes.append(Var(self._current_token))
+            self._eat(TokenType.ID)
+
+        self._eat(TokenType.COLON)
+        type_node = self._type_spec()
+        return tuple(
+            VarDeclaration(var_node, type_node) for var_node in var_nodes
+        )
+
+    def _type_spec(self):
+        """
+        type_spec : INTEGER | REAL
+        """
+        token = self._current_token
+        if self._current_token.get_type() == TokenType.INTEGER:
+            self._eat(TokenType.INTEGER)
+        elif self._current_token.get_type() == TokenType.REAL:
+            self._eat(TokenType.REAL)
+        else:
+            self._error()
+
+        return Type(token)
 
     def _compound_statement(self):
         """
@@ -126,20 +191,20 @@ class Parser:
         """
         Process operand production.
 
-        operand : factor ((MULTIPLY | DIVIDE) factor)*
+        operand : factor ((MULTIPLY | INTEGER_DIV | REAL_DIV) factor)*
         """
 
         node = self._factor()
 
-        types = (TokenType.MULTIPLY, TokenType.DIVIDE, TokenType.INT_DIVIDE)
+        types = (TokenType.MULTIPLY, TokenType.INTEGER_DIV, TokenType.REAL_DIV)
         while self._current_token.get_type() in (types):
             token = self._current_token
             if token.get_type() == TokenType.MULTIPLY:
                 self._eat(TokenType.MULTIPLY)
-            elif token.get_type() == TokenType.DIVIDE:
-                self._eat(TokenType.DIVIDE)
-            elif token.get_type() == TokenType.INT_DIVIDE:
-                self._eat(TokenType.INT_DIVIDE)
+            elif token.get_type() == TokenType.INTEGER_DIV:
+                self._eat(TokenType.INTEGER_DIV)
+            elif token.get_type() == TokenType.REAL_DIV:
+                self._eat(TokenType.REAL_DIV)
             else:
                 self._error()
 
@@ -152,7 +217,8 @@ class Parser:
 
         factor : PLUS factor
                | MINUS factor
-               | INTEGER
+               | INTEGER_LITERAL
+               | REAL_LITERAL
                | LPAR expr RPAR
                | variable
         """
@@ -160,8 +226,11 @@ class Parser:
         if token.get_type() in (TokenType.PLUS, TokenType.MINUS):
             self._eat(token.get_type())
             return UnaryOperation(op=token, right=self._factor())
-        elif token.get_type() == TokenType.INTEGER:
-            self._eat(TokenType.INTEGER)
+        elif token.get_type() == TokenType.INTEGER_LITERAL:
+            self._eat(TokenType.INTEGER_LITERAL)
+            return Number(token)
+        elif token.get_type() == TokenType.REAL_LITERAL:
+            self._eat(TokenType.REAL_LITERAL)
             return Number(token)
         elif token.get_type() == TokenType.LPAR:
             self._eat(TokenType.LPAR)
