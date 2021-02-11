@@ -1,13 +1,13 @@
 
 from lexer import TokenType
 from node_visitor import NodeVisitor
-from symbol import SymbolTableBuilder
+from semantic_analyzer import SemanticAnalyzer
 
 
 class Interpreter(NodeVisitor):
     def __init__(self, parser):
         self._parser = parser
-        self._symbol_table_builder = SymbolTableBuilder(parser)
+        self._semantic_analyzer = SemanticAnalyzer(parser)
         self.GLOBAL_SCOPE = dict()
 
     def execute(self):
@@ -18,7 +18,7 @@ class Interpreter(NodeVisitor):
         Expected ouptut: 638
         (At this point integer and float division work the same way).
         """
-        self._symbol_table_builder.build()
+        self._semantic_analyzer.analyze()
         tree = self._parser.parse()
         return self._visit(tree)
 

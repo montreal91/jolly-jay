@@ -62,7 +62,7 @@ class Parser:
                      | empty
         """
         declarations = []
-        if self._current_token.get_type() == TokenType.VAR:
+        while self._current_token.get_type() == TokenType.VAR:
             self._eat(TokenType.VAR)
             while self._current_token.get_type() == TokenType.ID:
                 var_decl = self._variable_declaration()
@@ -271,6 +271,10 @@ class Parser:
         if self._current_token.get_type() == token_type:
             self._current_token = self._lexer.get_next_token()
         else:
+            print(
+                f"expected type was {token_type} "
+                f"got {self._current_token.get_type()}"
+            )
             self._error()
 
     def _error(self):
