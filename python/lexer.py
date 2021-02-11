@@ -17,6 +17,7 @@ class TokenType(Enum):
     MINUS = "MINUS"
     MULTIPLY = "MULTIPLY"
     PLUS = "PLUS"
+    PROCEDURE = "PROCEDURE"
     PROGRAM = "PROGRAM"
     REAL = "REAL"
     REAL_DIV = "REAL_DIV"
@@ -64,6 +65,7 @@ ONE_SYMBOL_TOKENS = {
 
 RESERVED_KEYWORDS = {
     "program": Token(TokenType.PROGRAM, "PROGRAM"),
+    "procedure": Token(TokenType.PROCEDURE, "PROCEDURE"),
     "var": Token(TokenType.VAR, "VAR"),
     "integer": Token(TokenType.INTEGER, "INTEGER"),
     "real": Token(TokenType.REAL, "REAL"),

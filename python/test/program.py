@@ -26,6 +26,11 @@ class ProgramTc(TestCase):
             spi.execute()
             self.assertEqual(len(spi.GLOBAL_SCOPE), 0)
 
+    def test_part12(self):
+        with open("test/data/part12.pas") as source_file:
+            spi = _make_interpreter(text=source_file.read())
+            spi.execute()
+
 
 def _make_interpreter(text):
     return Interpreter(parser=Parser(lexer=Lexer(text=text)))

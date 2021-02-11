@@ -73,5 +73,11 @@ class Var(Ast):
         return self.token.get_value()
 
 
+class ProcedureDeclaration(Ast):
+    def __init__(self, proc_name, block_node):
+        self.proc_name = proc_name
+        self.block_node = block_node
+
+
 class NoOp(Ast):
     pass
