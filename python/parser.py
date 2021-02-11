@@ -6,6 +6,7 @@ from spi_ast import Compound
 from spi_ast import BinaryOperation
 from spi_ast import NoOp
 from spi_ast import Number
+from spi_ast import ProcedureDeclaration
 from spi_ast import Program
 from spi_ast import Var
 from spi_ast import VarDeclaration
@@ -57,6 +58,7 @@ class Parser:
     def _declarations(self):
         """
         declararions : VAR (variable_declaration SEMI)+
+                     | (PROCEDURE ID SEMI block SEMI)*
                      | empty
         """
         declarations = []
@@ -66,6 +68,16 @@ class Parser:
                 var_decl = self._variable_declaration()
                 declarations.extend(var_decl)
                 self._eat(TokenType.SEMI)
+
+        while self._current_token.get_type() == TokenType.PROCEDURE:
+            self._eat(TokenType.PROCEDURE)
+            proc_name = self._current_token.get_value()
+            self._eat(TokenType.ID)
+            self._eat(TokenType.SEMI)
+            block_node = self._block()
+            proc_decl = ProcedureDeclaration(proc_name, block_node)
+            declarations.append(proc_decl)
+            self._eat(TokenType.SEMI)
         return declarations
 
     def _variable_declaration(self):

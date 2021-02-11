@@ -22,6 +22,9 @@ class Interpreter(NodeVisitor):
         tree = self._parser.parse()
         return self._visit(tree)
 
+    def _visit_ProcedureDeclaration(self, node):
+        pass
+
     def _visit_Program(self, node):
         self._visit(node.block)
 

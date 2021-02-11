@@ -180,6 +180,10 @@ class LexerTc(TestCase):
         values = ["PROGRAM"] * 3
         self._test_lexer("PROGRAM program PrograM", zip(types, values))
 
+    def test_procedure_token(self):
+        expected = [(TokenType.PROCEDURE, "PROCEDURE")] * 3
+        self._test_lexer("PROCEDURE procedure ProceduRE", tuple(expected))
+
     def test_var_token(self):
         expected = [(TokenType.VAR, "VAR")] * 3
         self._test_lexer("VAR var Var", expected)

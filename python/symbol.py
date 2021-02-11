@@ -75,6 +75,9 @@ class SymbolTableBuilder(NodeVisitor):
             self._visit(dec)
         self._visit(node.compound_statement)
 
+    def _visit_ProcedureDeclaration(self, node):
+        pass
+
     def _visit_Program(self, node):
         self._visit(node.block)
 
