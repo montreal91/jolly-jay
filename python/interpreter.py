@@ -1,20 +1,13 @@
 
 from lexer import TokenType
-
-
-class NodeVisitor:
-    def _visit(self, node):
-        method_name = "_visit_" + type(node).__name__
-        visitor = getattr(self, method_name, self._generic_visit)
-        return visitor(node)
-
-    def _generic_visit(self, node):
-        raise Exception(f"No visit_{type(node).__name__} method.")
+from node_visitor import NodeVisitor
+from symbol import SymbolTableBuilder
 
 
 class Interpreter(NodeVisitor):
     def __init__(self, parser):
         self._parser = parser
+        self._symbol_table_builder = SymbolTableBuilder(parser)
         self.GLOBAL_SCOPE = dict()
 
     def execute(self):
@@ -25,6 +18,7 @@ class Interpreter(NodeVisitor):
         Expected ouptut: 638
         (At this point integer and float division work the same way).
         """
+        self._symbol_table_builder.build()
         tree = self._parser.parse()
         return self._visit(tree)
 
