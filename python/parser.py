@@ -16,15 +16,19 @@ from spi_ast import UnaryOperation
 class Parser:
     def __init__(self, lexer):
         self._lexer = lexer
+        self._parse_tree = None
 
         # Set current token to the first token from the input
         self._current_token = self._lexer.get_next_token()
 
     def parse(self):
-        node = self._program()
+        if self._parse_tree is not None:
+            return self._parse_tree
+
+        self._parse_tree = self._program()
         if self._current_token.get_type() != TokenType.EOF:
             self._error()
-        return node
+        return self._parse_tree
 
     def _program(self):
         """
