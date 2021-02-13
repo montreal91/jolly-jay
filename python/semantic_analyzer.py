@@ -1,13 +1,13 @@
 
 from node_visitor import NodeVisitor
-from symbol import SymbolTable
+from symbol import ScopedSymbolTable
 from symbol import BuiltinTypeSymbol
 from symbol import VarSymbol
 
 
 class SemanticAnalyzer(NodeVisitor):
     def __init__(self, parser):
-        self._symtab = SymbolTable()
+        self._symtab = ScopedSymbolTable(scope_name="Global", scope_level=1)
         self._parser = parser
 
     @property

@@ -31,10 +31,20 @@ class VarSymbol(Symbol):
     __repr__ = __str__
 
 
-class SymbolTable:
-    def __init__(self):
+class ScopedSymbolTable:
+    def __init__(self, scope_name, scope_level):
+        self._scope_name = scope_name
+        self._scope_level = scope_level
         self._symbols = {}
         self._init_builtins()
+
+    @property
+    def scope_name(self):
+        return self._scope_name
+
+    @property
+    def scope_level(self):
+        return self._scope_level
 
     def __str__(self):
         s = "Symbols: {symbols}".format(
