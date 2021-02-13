@@ -31,7 +31,8 @@ class SemanticAnalyzer(NodeVisitor):
 
         procedure_scope = ScopedSymbolTable(
             scope_name=proc_name,
-            scope_level=self._scope.scope_level + 1
+            scope_level=self._scope.scope_level + 1,
+            enclosing_scope=self._scope
         )
         self._scope = procedure_scope
 
@@ -44,11 +45,18 @@ class SemanticAnalyzer(NodeVisitor):
             proc_symbol.params.append(var_symbol)
 
         self._visit(node.block_node)
+        self._scope = self._scope.enclosing_scope
 
 
     def _visit_Program(self, node):
-        self._scope = ScopedSymbolTable(scope_name="Global", scope_level=1)
+        global_scope = ScopedSymbolTable(
+            scope_name="Global",
+            scope_level=1,
+            enclosing_scope=self._scope
+        )
+        self._scope = global_scope
         self._visit(node.block)
+        self._scope = global_scope
 
     def _visit_BinaryOperation(self, node):
         self._visit(node.left)
@@ -72,6 +80,11 @@ class SemanticAnalyzer(NodeVisitor):
         type_symbol = self._scope.lookup(type_name)
 
         var_name = node.var_node.value
+        if self._scope.lookup(name=var_name, go_deep=False) is not None:
+            raise PascalDuplicateIdentifier(
+                f"Error: Duplicate identifier '{var_name}' is found."
+            )
+
         var_symbol = VarSymbol(var_name, type_symbol)
 
         self._scope.insert(VarSymbol(var_name, type_symbol))

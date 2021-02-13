@@ -7,6 +7,7 @@ from semantic_analyzer import SemanticAnalyzer
 from semantic_analyzer import PascalNameError
 from semantic_analyzer import PascalDuplicateIdentifier
 from symbol import BuiltinTypeSymbol
+from symbol import ProcedureSymbol
 from symbol import VarSymbol
 
 
@@ -104,6 +105,37 @@ class SemanticAnalyzerTc(TestCase):
             s5 = stb.scope.lookup("alpha")
             self.assertEqual(type(s5), ProcedureSymbol)
             self.assertEqual(s5.get_type().get_name(), "PROCEDURE")
+
+    def test_nested_scopes03(self):
+        with open("test/data/nestedscopes03.pas") as source_file:
+            stb = _make_semantic_analyzer(text=source_file.read())
+            stb.analyze()
+
+            s1 = stb.scope.lookup("INTEGER")
+            self.assertEqual(type(s1), BuiltinTypeSymbol)
+            self.assertEqual(s1.get_name(), "INTEGER")
+            self.assertEqual(s1.get_type(), None)
+
+            s2 = stb.scope.lookup("REAL")
+            self.assertEqual(type(s2), BuiltinTypeSymbol)
+            self.assertEqual(s2.get_name(), "REAL")
+            self.assertEqual(s2.get_type(), None)
+
+            s3 = stb.scope.lookup("x")
+            self.assertEqual(type(s3), VarSymbol)
+            self.assertEqual(s3.get_type().get_name(), "REAL")
+
+            s4 = stb.scope.lookup("y")
+            self.assertEqual(type(s4), VarSymbol)
+            self.assertEqual(s4.get_type().get_name(), "REAL")
+
+            s5 = stb.scope.lookup("alphaa")
+            self.assertEqual(type(s5), ProcedureSymbol)
+            self.assertEqual(s5.get_type().get_name(), "PROCEDURE")
+
+            s6 = stb.scope.lookup("alphab")
+            self.assertEqual(type(s6), ProcedureSymbol)
+            self.assertEqual(s6.get_type().get_name(), "PROCEDURE")
 
 
 def _make_semantic_analyzer(text):
