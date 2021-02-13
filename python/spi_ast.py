@@ -74,10 +74,17 @@ class Var(Ast):
 
 
 class ProcedureDeclaration(Ast):
-    def __init__(self, proc_name, block_node):
+    def __init__(self, proc_name, params, block_node):
         self.proc_name = proc_name
+        self.params = params
         self.block_node = block_node
 
 
 class NoOp(Ast):
     pass
+
+
+class Param(Ast):
+    def __init__(self, var_node, type_node):
+        self.var_node = var_node
+        self.type_node = type_node

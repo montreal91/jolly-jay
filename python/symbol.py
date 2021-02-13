@@ -31,10 +31,42 @@ class VarSymbol(Symbol):
     __repr__ = __str__
 
 
-class SymbolTable:
-    def __init__(self):
+class ProcedureSymbol(Symbol):
+    def __init__(self, name, params=None):
+        super().__init__(name)
+        self._type = BuiltinTypeSymbol("PROCEDURE")
+        self.params = params
+        if params is None:
+            self.params = []
+
+    def __str__(self):
+        return (
+            f"<{self.__class__.__name__}"
+            f"(name={self.name}, parameters={self.params})>"
+        )
+
+    __repr__ = __str__
+
+
+class ScopedSymbolTable:
+    def __init__(self, scope_name, scope_level, enclosing_scope=None):
+        self._scope_name = scope_name
+        self._scope_level = scope_level
         self._symbols = {}
+        self._enclosing_scope = enclosing_scope
         self._init_builtins()
+
+    @property
+    def scope_name(self):
+        return self._scope_name
+
+    @property
+    def scope_level(self):
+        return self._scope_level
+
+    @property
+    def enclosing_scope(self):
+        return self._enclosing_scope
 
     def __str__(self):
         s = "Symbols: {symbols}".format(
@@ -43,12 +75,21 @@ class SymbolTable:
 
     __repr__ = __str__
 
-    def define(self, symbol):
+    def insert(self, symbol):
         self._symbols[symbol.get_name()] = symbol
 
-    def lookup(self, name):
-        return self._symbols.get(name)
+    def lookup(self, name, go_deep=True):
+        if not go_deep:
+            return self._symbols.get(name)
+
+        scope = self
+        while scope != None:
+            got = scope._symbols.get(name)
+            if got != None:
+                return got
+            scope = scope.enclosing_scope
+        return None
 
     def _init_builtins(self):
-        self.define(BuiltinTypeSymbol("INTEGER"))
-        self.define(BuiltinTypeSymbol("REAL"))
+        self.insert(BuiltinTypeSymbol("INTEGER"))
+        self.insert(BuiltinTypeSymbol("REAL"))
