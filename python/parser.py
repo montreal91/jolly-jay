@@ -1,11 +1,12 @@
 
 from lexer import TokenType
 from spi_ast import Assign
+from spi_ast import BinaryOperation
 from spi_ast import Block
 from spi_ast import Compound
-from spi_ast import BinaryOperation
 from spi_ast import NoOp
 from spi_ast import Number
+from spi_ast import Param
 from spi_ast import ProcedureDeclaration
 from spi_ast import Program
 from spi_ast import Var
@@ -58,7 +59,7 @@ class Parser:
     def _declarations(self):
         """
         declararions : VAR (variable_declaration SEMI)+
-                     | (PROCEDURE ID SEMI block SEMI)*
+                     | (PROCEDURE ID (LPAR formal_parameter_list RPAR)? SEMI block SEMI)*
                      | empty
         """
         declarations = []
@@ -73,12 +74,45 @@ class Parser:
             self._eat(TokenType.PROCEDURE)
             proc_name = self._current_token.get_value()
             self._eat(TokenType.ID)
+            params = []
+            if self._current_token.get_type() == TokenType.LPAR:
+                self._eat(TokenType.LPAR)
+                params = self._formal_parameter_list()
+                self._eat(TokenType.RPAR)
             self._eat(TokenType.SEMI)
             block_node = self._block()
-            proc_decl = ProcedureDeclaration(proc_name, block_node)
+            proc_decl = ProcedureDeclaration(proc_name, params, block_node)
             declarations.append(proc_decl)
             self._eat(TokenType.SEMI)
         return declarations
+
+    def _formal_parameter_list(self):
+        """
+        formal_parameter_list : formal_parameters
+                              | fromal_parameters SEMI formal_parameter_list
+        """
+        parameters = self._formal_parameters()
+        if self._current_token.get_type() == TokenType.SEMI:
+            parameters.expand(self._formal_parameter_list())
+        return parameters
+
+    def _formal_parameters(self):
+        """
+        formal_parameters : ID (COMMA ID)* COLON type_spec
+        """
+        param_nodes = [Var(self._current_token)]
+        self._eat(TokenType.ID)
+        while self._current_token.get_type() == TokenType.COMMA:
+            self._eat(TokenType.COMMA)
+
+            param_nodes.append(Var(self._current_token))
+            self._eat(TokenType.ID)
+
+        self._eat(TokenType.COLON)
+        type_node = self._type_spec()
+        return tuple(
+            Param(var_node, type_node) for var_node in param_nodes
+        )
 
     def _variable_declaration(self):
         """

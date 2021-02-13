@@ -1,18 +1,19 @@
 
 from node_visitor import NodeVisitor
-from symbol import ScopedSymbolTable
 from symbol import BuiltinTypeSymbol
+from symbol import ProcedureSymbol
+from symbol import ScopedSymbolTable
 from symbol import VarSymbol
 
 
 class SemanticAnalyzer(NodeVisitor):
     def __init__(self, parser):
-        self._symtab = ScopedSymbolTable(scope_name="Global", scope_level=1)
+        self._scope = None
         self._parser = parser
 
     @property
-    def symtab(self):
-        return self._symtab
+    def scope(self):
+        return self._scope
 
     def analyze(self):
         tree = self._parser.parse()
@@ -24,9 +25,29 @@ class SemanticAnalyzer(NodeVisitor):
         self._visit(node.compound_statement)
 
     def _visit_ProcedureDeclaration(self, node):
-        pass
+        proc_name = node.proc_name
+        proc_symbol = ProcedureSymbol(proc_name)
+        self._scope.insert(proc_symbol)
+
+        procedure_scope = ScopedSymbolTable(
+            scope_name=proc_name,
+            scope_level=self._scope.scope_level + 1
+        )
+        self._scope = procedure_scope
+
+        # Insert params into the procedure scope
+        for param in node.params:
+            param_type = self._scope.lookup(param.type_node.value)
+            param_name = param.var_node.value
+            var_symbol = VarSymbol(param_name, param_type)
+            self._scope.insert(var_symbol)
+            proc_symbol.params.append(var_symbol)
+
+        self._visit(node.block_node)
+
 
     def _visit_Program(self, node):
+        self._scope = ScopedSymbolTable(scope_name="Global", scope_level=1)
         self._visit(node.block)
 
     def _visit_BinaryOperation(self, node):
@@ -48,17 +69,16 @@ class SemanticAnalyzer(NodeVisitor):
 
     def _visit_VarDeclaration(self, node):
         type_name = node.type_node.value
-        type_symbol = self._symtab.lookup(type_name)
+        type_symbol = self._scope.lookup(type_name)
+
         var_name = node.var_node.value
-        if self._symtab.lookup(var_name) != None:
-            raise PascalDuplicateIdentifier(
-                "Error: Duplicate identifier '%s' found" % var_name
-            )
-        self._symtab.define(VarSymbol(var_name, type_symbol))
+        var_symbol = VarSymbol(var_name, type_symbol)
+
+        self._scope.insert(VarSymbol(var_name, type_symbol))
 
     def _visit_Assign(self, node):
         var_name = node.left.value
-        var_symbol = self._symtab.lookup(var_name)
+        var_symbol = self._scope.lookup(var_name)
         if var_symbol is None:
             raise PascalNameError(var_name)
 
@@ -66,7 +86,7 @@ class SemanticAnalyzer(NodeVisitor):
 
     def _visit_Var(self, node):
         var_name = node.value
-        var_symbol = self._symtab.lookup(var_name)
+        var_symbol = self._scope.lookup(var_name)
 
         if var_symbol is None:
             raise PascalNameError(var_name)

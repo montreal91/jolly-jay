@@ -31,6 +31,22 @@ class VarSymbol(Symbol):
     __repr__ = __str__
 
 
+class ProcedureSymbol(Symbol):
+    def __init__(self, name, params=None):
+        super().__init__(name)
+        self.params = params
+        if params is None:
+            self.params = []
+
+    def __str__(self):
+        return (
+            f"<{self.__class__.__name__}"
+            f"(name={self.name}, parameters={self.params})>"
+        )
+
+    __repr__ = __str__
+
+
 class ScopedSymbolTable:
     def __init__(self, scope_name, scope_level):
         self._scope_name = scope_name
@@ -53,12 +69,12 @@ class ScopedSymbolTable:
 
     __repr__ = __str__
 
-    def define(self, symbol):
+    def insert(self, symbol):
         self._symbols[symbol.get_name()] = symbol
 
     def lookup(self, name):
         return self._symbols.get(name)
 
     def _init_builtins(self):
-        self.define(BuiltinTypeSymbol("INTEGER"))
-        self.define(BuiltinTypeSymbol("REAL"))
+        self.insert(BuiltinTypeSymbol("INTEGER"))
+        self.insert(BuiltinTypeSymbol("REAL"))
