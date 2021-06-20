@@ -1,3 +1,4 @@
+from spi.errors import ParserError, ErrorCode
 from spi.token import TokenType
 from spi.ast import Assign
 from spi.ast import BinaryOperation
@@ -28,7 +29,10 @@ class Parser:
 
         self._parse_tree = self._program()
         if self._current_token.get_type() != TokenType.EOF:
-            self._error()
+            self._error(
+                error_code=ErrorCode.UNEXPECTED_TOKEN,
+                token=self._current_token
+            )
         return self._parse_tree
 
     def _program(self):
@@ -57,8 +61,8 @@ class Parser:
 
     def _declarations(self):
         """
-        declarations : VAR (variable_declaration SEMI)+
-                     | (PROCEDURE ID (LPAR formal_parameter_list RPAR)? SEMI block SEMI)*
+        declarations : (VAR (variable_declaration SEMI)+)?
+                     | procedure_declaration*
                      | empty
         """
         declarations = []
@@ -70,20 +74,27 @@ class Parser:
                 self._eat(TokenType.SEMI)
 
         while self._current_token.get_type() == TokenType.PROCEDURE:
-            self._eat(TokenType.PROCEDURE)
-            proc_name = self._current_token.get_value()
-            self._eat(TokenType.ID)
-            params = []
-            if self._current_token.get_type() == TokenType.LPAR:
-                self._eat(TokenType.LPAR)
-                params = self._formal_parameter_list()
-                self._eat(TokenType.RPAR)
-            self._eat(TokenType.SEMI)
-            block_node = self._block()
-            proc_decl = ProcedureDeclaration(proc_name, params, block_node)
-            declarations.append(proc_decl)
-            self._eat(TokenType.SEMI)
+            declarations.append(self._procedure_declaration())
         return declarations
+
+    def _procedure_declaration(self):
+        """
+        procedure_declaration :
+            PROCEDURE ID (LPAR formal_parameter_list RPAR)? SEMI block SEMI
+        """
+        self._eat(TokenType.PROCEDURE)
+        proc_name = self._current_token.get_value()
+        self._eat(TokenType.ID)
+        params = []
+        if self._current_token.get_type() == TokenType.LPAR:
+            self._eat(TokenType.LPAR)
+            params = self._formal_parameter_list()
+            self._eat(TokenType.RPAR)
+        self._eat(TokenType.SEMI)
+        block_node = self._block()
+        proc_decl = ProcedureDeclaration(proc_name, params, block_node)
+        self._eat(TokenType.SEMI)
+        return proc_decl
 
     def _formal_parameter_list(self):
         """
@@ -141,7 +152,7 @@ class Parser:
         elif self._current_token.get_type() == TokenType.REAL:
             self._eat(TokenType.REAL)
         else:
-            self._error()
+            self._error(error_code=ErrorCode.UNEXPECTED_TOKEN, token=token)
 
         return Type(token)
 
@@ -172,7 +183,10 @@ class Parser:
             results.append(self._statement())
 
         if self._current_token.get_type() == TokenType.ID:
-            self._error()
+            self._error(
+                error_code=ErrorCode.UNEXPECTED_TOKEN,
+                token=self._current_token
+            )
 
         return results
 
@@ -232,7 +246,7 @@ class Parser:
             elif token.get_type() == TokenType.MINUS:
                 self._eat(TokenType.MINUS)
             else:
-                self._error()
+                self._error(error_code=ErrorCode.UNEXPECTED_TOKEN, token=token)
 
             node = BinaryOperation(left=node, op=token, right=self._operand())
         return node
@@ -256,7 +270,7 @@ class Parser:
             elif token.get_type() == TokenType.REAL_DIV:
                 self._eat(TokenType.REAL_DIV)
             else:
-                self._error()
+                self._error(error_code=ErrorCode.UNEXPECTED_TOKEN, token=token)
 
             node = BinaryOperation(left=node, op=token, right=self._factor())
         return node
@@ -290,7 +304,7 @@ class Parser:
         elif token.get_type() == TokenType.ID:
             # ???
             return self._variable()
-        self._error()
+        self._error(error_code=ErrorCode.UNEXPECTED_TOKEN, token=token)
 
     def _eat(self, token_type):
         """
@@ -309,7 +323,14 @@ class Parser:
                 f"expected type was {token_type} "
                 f"got {self._current_token.get_type()}"
             )
-            self._error()
+            self._error(
+                error_code=ErrorCode.UNEXPECTED_TOKEN,
+                token=self._current_token
+            )
 
-    def _error(self):
-        raise Exception("Invalid syntax")
+    def _error(self, error_code, token):
+        raise ParserError(
+            error_code=error_code,
+            token=token,
+            message=f"{error_code.value} -> {token}",
+        )
