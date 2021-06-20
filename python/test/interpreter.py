@@ -3,9 +3,9 @@ from random import randint
 from unittest import skip
 from unittest import TestCase
 
-from lexer import Lexer
-from parser import Parser
-from interpreter import Interpreter
+from spi.lexer import Lexer
+from spi.parser import Parser
+from spi.interpreter import Interpreter
 
 
 MIN, MAX = 100, 1000
@@ -116,7 +116,7 @@ class InterpreterTc(TestCase):
         i = _make_interpreter("42 * (3 + 4 * (12 - 3))   ")
         self.assertEqual(i.execute(), 1638)
 
-    def test_preceeding_whitespace(self):
+    def test_preceding_whitespace(self):
         i = _make_interpreter("     42 * (3 + 4 * (12 - 3))")
         self.assertEqual(i.execute(), 1638)
 
@@ -138,7 +138,7 @@ class InterpreterTc(TestCase):
         x1 = randint(MIN, MAX)
         x2 = randint(MIN, MAX)
         i = _make_interpreter(f"{x1} + -{x2}")
-        self.assertEqual(i.execute(), x1 +- x2)
+        self.assertEqual(i.execute(), x1 + - x2)
 
     def test_unary_triple_minus_rnd(self):
         x1 = randint(MIN, MAX)

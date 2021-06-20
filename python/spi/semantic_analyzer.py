@@ -1,9 +1,8 @@
 
-from node_visitor import NodeVisitor
-from symbol import BuiltinTypeSymbol
-from symbol import ProcedureSymbol
-from symbol import ScopedSymbolTable
-from symbol import VarSymbol
+from spi.node_visitor import NodeVisitor
+from spi.symbol import ProcedureSymbol
+from spi.symbol import ScopedSymbolTable
+from spi.symbol import VarSymbol
 
 
 class SemanticAnalyzer(NodeVisitor):

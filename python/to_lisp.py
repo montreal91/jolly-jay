@@ -1,10 +1,10 @@
 
-from interpreter import NodeVisitor
-from lexer import PLUS
-from lexer import MINUS
-from lexer import MULTIPLY
-from lexer import DIVIDE
-from lexer import Lexer
+from spi.interpreter import NodeVisitor
+from spi.lexer import PLUS
+from spi.lexer import MINUS
+from spi.lexer import MULTIPLY
+from spi.lexer import DIVIDE
+from spi.lexer import Lexer
 from parser import Parser
 
 

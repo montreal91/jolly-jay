@@ -1,7 +1,7 @@
 
-from lexer import Lexer
-from parser import Parser
-from interpreter import Interpreter
+from spi.lexer import Lexer
+from spi.parser import Parser
+from spi.interpreter import Interpreter
 
 
 def _evaluate(text):

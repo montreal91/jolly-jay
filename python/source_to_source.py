@@ -1,10 +1,11 @@
 
-from node_visitor import NodeVisitor
-from parser import Parser
-from lexer import Lexer
-from symbol import ProcedureSymbol
-from symbol import ScopedSymbolTable
-from symbol import VarSymbol
+from spi.node_visitor import NodeVisitor
+from spi.parser import Parser
+from spi.lexer import Lexer
+from spi.semantic_analyzer import PascalDuplicateIdentifier, PascalNameError
+from spi.symbol import ProcedureSymbol
+from spi.symbol import ScopedSymbolTable
+from spi.symbol import VarSymbol
 
 
 class SourceToSourceCompiler(NodeVisitor):

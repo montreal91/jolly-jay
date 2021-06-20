@@ -1,18 +1,17 @@
-
-from lexer import TokenType
-from spi_ast import Assign
-from spi_ast import BinaryOperation
-from spi_ast import Block
-from spi_ast import Compound
-from spi_ast import NoOp
-from spi_ast import Number
-from spi_ast import Param
-from spi_ast import ProcedureDeclaration
-from spi_ast import Program
-from spi_ast import Var
-from spi_ast import VarDeclaration
-from spi_ast import Type
-from spi_ast import UnaryOperation
+from spi.token import TokenType
+from spi.ast import Assign
+from spi.ast import BinaryOperation
+from spi.ast import Block
+from spi.ast import Compound
+from spi.ast import NoOp
+from spi.ast import Number
+from spi.ast import Param
+from spi.ast import ProcedureDeclaration
+from spi.ast import Program
+from spi.ast import Var
+from spi.ast import VarDeclaration
+from spi.ast import Type
+from spi.ast import UnaryOperation
 
 
 class Parser:
@@ -58,7 +57,7 @@ class Parser:
 
     def _declarations(self):
         """
-        declararions : VAR (variable_declaration SEMI)+
+        declarations : VAR (variable_declaration SEMI)+
                      | (PROCEDURE ID (LPAR formal_parameter_list RPAR)? SEMI block SEMI)*
                      | empty
         """
@@ -89,11 +88,11 @@ class Parser:
     def _formal_parameter_list(self):
         """
         formal_parameter_list : formal_parameters
-                              | fromal_parameters SEMI formal_parameter_list
+                              | formal_parameters SEMI formal_parameter_list
         """
         parameters = self._formal_parameters()
         if self._current_token.get_type() == TokenType.SEMI:
-            parameters.expand(self._formal_parameter_list())
+            parameters.extend(self._formal_parameter_list())
         return parameters
 
     def _formal_parameters(self):
@@ -110,15 +109,15 @@ class Parser:
 
         self._eat(TokenType.COLON)
         type_node = self._type_spec()
-        return tuple(
+        return [
             Param(var_node, type_node) for var_node in param_nodes
-        )
+        ]
 
     def _variable_declaration(self):
         """
         variable_declaration : ID (COMMA ID)* COLON type_spec
         """
-        var_nodes = [Var(self._current_token)] # first ID
+        var_nodes = [Var(self._current_token)]  # first ID
         self._eat(TokenType.ID)
 
         while self._current_token.get_type() == TokenType.COMMA:
@@ -210,7 +209,8 @@ class Parser:
         self._eat(TokenType.ID)
         return node
 
-    def _empty(self):
+    @staticmethod
+    def _empty():
         """
         An empty production.
         """
@@ -220,7 +220,7 @@ class Parser:
         """
         Process expr production.
 
-        expr    : operand ((PLUS | MINUS) opeand)*
+        expr    : operand ((PLUS | MINUS) operand)*
         """
 
         node = self._operand()
@@ -247,7 +247,7 @@ class Parser:
         node = self._factor()
 
         types = (TokenType.MULTIPLY, TokenType.INTEGER_DIV, TokenType.REAL_DIV)
-        while self._current_token.get_type() in (types):
+        while self._current_token.get_type() in types:
             token = self._current_token
             if token.get_type() == TokenType.MULTIPLY:
                 self._eat(TokenType.MULTIPLY)
@@ -263,7 +263,7 @@ class Parser:
 
     def _factor(self):
         """
-        Process factor prodution.
+        Process factor production.
 
         factor : PLUS factor
                | MINUS factor
