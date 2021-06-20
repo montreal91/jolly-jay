@@ -1,11 +1,8 @@
 
 from math import isclose
 from unittest import TestCase
-from unittest import skip
 
-from lexer import Lexer
-from parser import Parser
-from interpreter import Interpreter
+from test.common import _make_interpreter
 
 
 class ProgramTc(TestCase):
@@ -30,7 +27,3 @@ class ProgramTc(TestCase):
         with open("test/data/part12.pas") as source_file:
             spi = _make_interpreter(text=source_file.read())
             spi.execute()
-
-
-def _make_interpreter(text):
-    return Interpreter(parser=Parser(lexer=Lexer(text=text)))

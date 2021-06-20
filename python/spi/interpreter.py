@@ -1,7 +1,6 @@
-
-from lexer import TokenType
-from node_visitor import NodeVisitor
-from semantic_analyzer import SemanticAnalyzer
+from spi.token import TokenType
+from spi.node_visitor import NodeVisitor
+from spi.semantic_analyzer import SemanticAnalyzer
 
 
 class Interpreter(NodeVisitor):
@@ -15,7 +14,7 @@ class Interpreter(NodeVisitor):
         Executes the arithmetic expression.
 
         Input: 42 * (3 + 4 * (12 - 3)) - (256 - 128 - 16 - 8 - 4) * (8 + 2)
-        Expected ouptut: 638
+        Expected output: 638
         (At this point integer and float division work the same way).
         """
         self._semantic_analyzer.analyze()

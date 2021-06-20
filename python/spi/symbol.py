@@ -34,7 +34,7 @@ class VarSymbol(Symbol):
 class ProcedureSymbol(Symbol):
     def __init__(self, name, params=None):
         super().__init__(name)
-        self._type = BuiltinTypeSymbol("PROCEDURE")
+        self._type = BuiltinTypeSymbol("procedure")
         self.params = params
         if params is None:
             self.params = []
@@ -83,13 +83,13 @@ class ScopedSymbolTable:
             return self._symbols.get(name)
 
         scope = self
-        while scope != None:
+        while scope is not None:
             got = scope._symbols.get(name)
-            if got != None:
+            if got is not None:
                 return got
             scope = scope.enclosing_scope
         return None
 
     def _init_builtins(self):
-        self.insert(BuiltinTypeSymbol("INTEGER"))
-        self.insert(BuiltinTypeSymbol("REAL"))
+        self.insert(BuiltinTypeSymbol("integer"))
+        self.insert(BuiltinTypeSymbol("real"))
