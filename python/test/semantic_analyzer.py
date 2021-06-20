@@ -1,11 +1,12 @@
 
 from unittest import TestCase
 
+from spi.errors import SemanticError
 from spi.lexer import Lexer
 from spi.parser import Parser
 from spi.semantic_analyzer import SemanticAnalyzer
-from spi.semantic_analyzer import PascalNameError
-from spi.semantic_analyzer import PascalDuplicateIdentifier
+# from spi.semantic_analyzer import PascalNameError
+# from spi.semantic_analyzer import PascalDuplicateIdentifier
 from spi.symbol import BuiltinTypeSymbol
 from spi.symbol import ProcedureSymbol
 from spi.symbol import VarSymbol
@@ -44,7 +45,7 @@ class SemanticAnalyzerTc(TestCase):
     def test_name_error(self):
         with open("test/data/name_error1.pas") as source_file:
             stb = _make_semantic_analyzer(text=source_file.read())
-            with self.assertRaises(PascalNameError):
+            with self.assertRaises(SemanticError):
                 stb.analyze()
 
     def test_symtab2(self):
@@ -76,13 +77,13 @@ class SemanticAnalyzerTc(TestCase):
     def test_symtab5(self):
         with open("test/data/symtab5.pas") as source_file:
             stb = _make_semantic_analyzer(text=source_file.read())
-            with self.assertRaises(PascalNameError):
+            with self.assertRaises(SemanticError):
                 stb.analyze()
 
     def test_symtab6(self):
         with open("test/data/symtab6.pas") as source_file:
             stb = _make_semantic_analyzer(text=source_file.read())
-            with self.assertRaises(PascalDuplicateIdentifier):
+            with self.assertRaises(SemanticError):
                 stb.analyze()
 
     def test_nested_scopes02(self):

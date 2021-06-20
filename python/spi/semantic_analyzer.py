@@ -1,4 +1,4 @@
-
+from spi.errors import SemanticError, ErrorCode
 from spi.node_visitor import NodeVisitor
 from spi.symbol import ProcedureSymbol
 from spi.symbol import ScopedSymbolTable
@@ -17,6 +17,13 @@ class SemanticAnalyzer(NodeVisitor):
     def analyze(self):
         tree = self._parser.parse()
         self._visit(tree)
+
+    def _throw_error(self, error_code, token):
+        raise SemanticError(
+            error_code=error_code,
+            token=token,
+            message=f"{error_code.value} -> {token}"
+        )
 
     def _visit_Block(self, node):
         for dec in node.declarations:
@@ -80,11 +87,10 @@ class SemanticAnalyzer(NodeVisitor):
 
         var_name = node.var_node.value
         if self._scope.lookup(name=var_name, go_deep=False) is not None:
-            raise PascalDuplicateIdentifier(
-                f"Error: Duplicate identifier '{var_name}' is found."
+            self._throw_error(
+                error_code=ErrorCode.DUPLICATE_ID,
+                token=node.var_node.token
             )
-
-        var_symbol = VarSymbol(var_name, type_symbol)
 
         self._scope.insert(VarSymbol(var_name, type_symbol))
 
@@ -92,7 +98,10 @@ class SemanticAnalyzer(NodeVisitor):
         var_name = node.left.value
         var_symbol = self._scope.lookup(var_name)
         if var_symbol is None:
-            raise PascalNameError(var_name)
+            self._throw_error(
+                error_code=ErrorCode.ID_NOT_FOUND,
+                token=node.token
+            )
 
         self._visit(node.right)
 
@@ -101,19 +110,7 @@ class SemanticAnalyzer(NodeVisitor):
         var_symbol = self._scope.lookup(var_name)
 
         if var_symbol is None:
-            raise PascalNameError(var_name)
-
-
-class PascalError(Exception):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
-class PascalNameError(PascalError):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
-
-
-class PascalDuplicateIdentifier(PascalNameError):
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+            self._throw_error(
+                error_code=ErrorCode.ID_NOT_FOUND,
+                token=node.token
+            )
