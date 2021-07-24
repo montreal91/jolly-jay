@@ -7,6 +7,7 @@ from spi.ast import Compound
 from spi.ast import NoOp
 from spi.ast import Number
 from spi.ast import Param
+from spi.ast import ProcedureCall
 from spi.ast import ProcedureDeclaration
 from spi.ast import Program
 from spi.ast import Var
@@ -96,6 +97,34 @@ class Parser:
         self._eat(TokenType.SEMI)
         return proc_decl
 
+    def _proccall_statement(self):
+        """
+        proccall_statement: ID LPAR (expr (COMMA expr)*)? RPAR
+        """
+        token = self._current_token
+
+        proc_name = token.get_value()
+        self._eat(TokenType.ID)
+        self._eat(TokenType.LPAR)
+        actual_params = []
+
+        if self._current_token.get_type() != TokenType.RPAR:
+            node = self._expr()
+            actual_params.append(node)
+
+        while self._current_token.get_type() == TokenType.COMMA:
+            self._eat(TokenType.COMMA)
+            node = self._expr()
+            actual_params.append(node)
+
+        self._eat(TokenType.RPAR)
+
+        return ProcedureCall(
+            proc_name=proc_name,
+            actual_params=actual_params,
+            token=token
+        )
+
     def _formal_parameter_list(self):
         """
         formal_parameter_list : formal_parameters
@@ -103,6 +132,7 @@ class Parser:
         """
         parameters = self._formal_parameters()
         if self._current_token.get_type() == TokenType.SEMI:
+            self._eat(TokenType.SEMI)
             parameters.extend(self._formal_parameter_list())
         return parameters
 
@@ -193,14 +223,18 @@ class Parser:
     def _statement(self):
         """
         statement : compound_statement
+                  | proccall_statement
                   | assignment_statement
-                  |  empty
+                  | empty
         """
 
         if self._current_token.get_type() == TokenType.BEGIN:
             node = self._compound_statement()
         elif self._current_token.get_type() == TokenType.ID:
-            node = self._assignment_statement()
+            if self._lexer.get_current_char() == '(':
+                node = self._proccall_statement()
+            else:
+                node = self._assignment_statement()
         else:
             node = self._empty()
         return node

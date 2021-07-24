@@ -273,13 +273,110 @@ class LexerTc(TestCase):
         with open("test/data/part15.pas") as pas_file:
             self._test_extended_lexer(text=pas_file.read(), expected_data=expected_data)
 
-    def _check_token(self, token, expected_type, expected_value, expected_line=None, expected_column=None):
-        self.assertEqual(token.get_type(), expected_type, f"{token}\nExpected types are not equal.")
-        self.assertEqual(token.get_value(), expected_value, f"{token}\nExpected token values are not equal.")
+    def test_lexer_16(self):
+        expected_data = (
+            (TokenType.PROGRAM, "program", 2, 1),
+            (TokenType.ID, "part16", 2, 9),
+            (TokenType.SEMI, ";", 2, 15),
+            (TokenType.PROCEDURE, "procedure", 4, 1),
+            (TokenType.ID, "alpha", 4, 11),
+            (TokenType.LPAR, "(", 4, 16),
+            (TokenType.ID, "a", 4, 17),
+            (TokenType.COLON, ":", 4, 19),
+            (TokenType.INTEGER, "integer", 4, 21),
+            (TokenType.SEMI, ";", 4, 28),
+            (TokenType.ID, "b", 4, 30),
+            (TokenType.COLON, ":", 4, 32),
+            (TokenType.INTEGER, "integer", 4, 34),
+            (TokenType.RPAR, ")", 4, 41),
+            (TokenType.SEMI, ";", 4, 42),
+            (TokenType.VAR, "var", 5, 1),
+            (TokenType.ID, "x", 5, 5),
+            (TokenType.COLON, ":", 5, 7),
+            (TokenType.INTEGER, "integer", 5, 9),
+            (TokenType.SEMI, ";", 5, 16),
+            (TokenType.BEGIN, "begin", 6, 1),
+            (TokenType.ID, "x", 7, 4),
+            (TokenType.ASSIGN, ":=", 7, 6),
+            (TokenType.LPAR, "(", 7, 9),
+            (TokenType.ID, "a", 7, 10),
+            (TokenType.PLUS, "+", 7, 12),
+            (TokenType.ID, "b", 7, 14),
+            (TokenType.RPAR, ")", 7, 16),
+            (TokenType.MULTIPLY, "*", 7, 18),
+            (TokenType.INTEGER_LITERAL, 2, 7, 20),
+            (TokenType.SEMI, ";", 7, 21),
+            (TokenType.END, "end", 8, 1),
+            (TokenType.SEMI, ";", 8, 4),
+            (TokenType.PROCEDURE, "procedure", 10, 1),
+            (TokenType.ID, "beta", 10, 11),
+            (TokenType.SEMI, ";", 10, 15),
+            (TokenType.VAR, "var", 11, 1),
+            (TokenType.ID, "x", 11, 5),
+            (TokenType.COLON, ":", 11, 7),
+            (TokenType.REAL, "real", 11, 9),
+            (TokenType.SEMI, ";", 11, 13),
+            (TokenType.BEGIN, "begin", 12, 1),
+            (TokenType.ID, "x", 13, 3),
+            (TokenType.ASSIGN, ":=", 13, 5),
+            (TokenType.REAL_LITERAL, 9.1, 13, 8),
+            (TokenType.PLUS, "+", 13, 12),
+            (TokenType.REAL_LITERAL, 4.3, 13, 14),
+            (TokenType.SEMI, ";", 13, 17),
+            (TokenType.END, "end", 14, 1),
+            (TokenType.SEMI, ";", 14, 4),
+            (TokenType.BEGIN, "begin", 16, 1),
+            (TokenType.ID, "alpha", 18, 3),
+            (TokenType.LPAR, "(", 18, 8),
+            (TokenType.INTEGER_LITERAL, 3, 18, 9),
+            (TokenType.PLUS, "+", 18, 11),
+            (TokenType.INTEGER_LITERAL, 5, 18, 13),
+            (TokenType.COMMA, ",", 18, 14),
+            (TokenType.INTEGER_LITERAL, 7, 18, 16),
+            (TokenType.RPAR, ")", 18, 17),
+            (TokenType.SEMI, ";", 18, 18),
+            (TokenType.ID, "beta", 19, 3),
+            (TokenType.LPAR, "(", 19, 7),
+            (TokenType.RPAR, ")", 19, 8),
+            (TokenType.SEMI, ";", 19, 9),
+            (TokenType.END, "end", 20, 1),
+            (TokenType.DOT, ".", 20, 4),
+        )
+        with open("test/data/part16.pas") as pas_file:
+            self._test_extended_lexer(
+                text=pas_file.read(), expected_data=expected_data
+            )
+
+    def _check_token(
+            self,
+            token,
+            expected_type,
+            expected_value,
+            expected_line=None,
+            expected_column=None
+    ):
+        self.assertEqual(
+            token.get_type(),
+            expected_type,
+            f"{token}\nExpected types are not equal."
+        )
+        self.assertEqual(
+            token.get_value(),
+            expected_value,
+            f"{token}\nExpected token values are not equal."
+        )
         if expected_line is not None:
-            self.assertEqual(token.get_line_number(), expected_line, f"{token}\nExpected token lines are not equal.")
+            self.assertEqual(
+                token.get_line_number(),
+                expected_line,
+                f"{token}\nExpected token lines are not equal."
+            )
         if expected_column is not None:
-            self.assertEqual(token.get_column(), expected_column, f"{token}\nExpected token columns are not equal.")
+            self.assertEqual(
+                token.get_column(),
+                expected_column,
+                f"{token}\nExpected token columns are not equal."
+            )
 
     def _test_lexer(self, text, types_and_values):
         lexer = _make_lexer(text)
