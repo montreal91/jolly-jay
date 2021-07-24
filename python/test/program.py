@@ -27,3 +27,8 @@ class ProgramTc(TestCase):
         with open("test/data/part12.pas") as source_file:
             spi = _make_interpreter(text=source_file.read())
             spi.execute()
+
+    def test_part16(self):
+        with open("test/data/part16.pas") as source_file:
+            spi = _make_interpreter(text=source_file.read())
+            spi.execute()

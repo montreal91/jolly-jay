@@ -5,8 +5,6 @@ from spi.errors import SemanticError
 from spi.lexer import Lexer
 from spi.parser import Parser
 from spi.semantic_analyzer import SemanticAnalyzer
-# from spi.semantic_analyzer import PascalNameError
-# from spi.semantic_analyzer import PascalDuplicateIdentifier
 from spi.symbol import BuiltinTypeSymbol
 from spi.symbol import ProcedureSymbol
 from spi.symbol import VarSymbol
@@ -21,8 +19,8 @@ REAL_TYPE = "real"
 class SemanticAnalyzerTc(TestCase):
     def test_part11(self):
         with open("test/data/part11.pas") as source_file:
-            stb = _make_semantic_analyzer(text=source_file.read())
-            stb.analyze()
+            stb = SemanticAnalyzer()
+            stb.analyze(_make_parse_tree(text=source_file.read()))
 
             s1 = stb.scope.lookup(INTEGER_NAME)
             self.assertEqual(type(s1), BuiltinTypeSymbol)
@@ -44,14 +42,14 @@ class SemanticAnalyzerTc(TestCase):
 
     def test_name_error(self):
         with open("test/data/name_error1.pas") as source_file:
-            stb = _make_semantic_analyzer(text=source_file.read())
+            stb = SemanticAnalyzer()
             with self.assertRaises(SemanticError):
-                stb.analyze()
+                stb.analyze(_make_parse_tree(text=source_file.read()))
 
     def test_symtab2(self):
         with open("test/data/symtab2.pas") as source_file:
-            sa = _make_semantic_analyzer(text=source_file.read())
-            sa.analyze()
+            sa = SemanticAnalyzer()
+            sa.analyze(_make_parse_tree(text=source_file.read()))
 
             s3 = sa.scope.lookup("x")
             self.assertEqual(type(s3), VarSymbol)
@@ -63,8 +61,8 @@ class SemanticAnalyzerTc(TestCase):
 
     def test_symtab4(self):
         with open("test/data/symtab4.pas") as source_file:
-            sa = _make_semantic_analyzer(text=source_file.read())
-            sa.analyze()
+            sa = SemanticAnalyzer()
+            sa.analyze(_make_parse_tree(text=source_file.read()))
 
             s3 = sa.scope.lookup("x")
             self.assertEqual(type(s3), VarSymbol)
@@ -76,20 +74,21 @@ class SemanticAnalyzerTc(TestCase):
 
     def test_symtab5(self):
         with open("test/data/symtab5.pas") as source_file:
-            stb = _make_semantic_analyzer(text=source_file.read())
+            sa = SemanticAnalyzer()
             with self.assertRaises(SemanticError):
-                stb.analyze()
+                sa.analyze(_make_parse_tree(text=source_file.read()))
 
     def test_symtab6(self):
         with open("test/data/symtab6.pas") as source_file:
-            stb = _make_semantic_analyzer(text=source_file.read())
+            sa = SemanticAnalyzer()
+
             with self.assertRaises(SemanticError):
-                stb.analyze()
+                sa.analyze(_make_parse_tree(text=source_file.read()))
 
     def test_nested_scopes02(self):
         with open("test/data/nestedscopes02.pas") as source_file:
-            stb = _make_semantic_analyzer(text=source_file.read())
-            stb.analyze()
+            stb = SemanticAnalyzer()
+            stb.analyze(_make_parse_tree(text=source_file.read()))
 
             s1 = stb.scope.lookup(INTEGER_NAME)
             self.assertEqual(type(s1), BuiltinTypeSymbol)
@@ -115,8 +114,8 @@ class SemanticAnalyzerTc(TestCase):
 
     def test_nested_scopes03(self):
         with open("test/data/nestedscopes03.pas") as source_file:
-            stb = _make_semantic_analyzer(text=source_file.read())
-            stb.analyze()
+            stb = SemanticAnalyzer()
+            stb.analyze(_make_parse_tree(text=source_file.read()))
 
             s1 = stb.scope.lookup(INTEGER_NAME)
             self.assertEqual(type(s1), BuiltinTypeSymbol)
@@ -145,5 +144,6 @@ class SemanticAnalyzerTc(TestCase):
             self.assertEqual(s6.get_type().get_name(), PROCEDURE_TYPE)
 
 
-def _make_semantic_analyzer(text):
-    return SemanticAnalyzer(parser=Parser(lexer=Lexer(text=text)))
+def _make_parse_tree(text):
+    parser = Parser(lexer=Lexer(text=text))
+    return parser.parse()

@@ -12,10 +12,11 @@ class Lexer:
         self._text = text
         self._pos = 0
 
-        self._current_char = self._text[self._pos]
-
         self._line_number = 1
         self._column = 1
+
+    def get_current_char(self):
+        return self._text[self._pos]
 
     def get_next_token(self):
         """
@@ -148,7 +149,7 @@ class Lexer:
 
     def _throw_error(self):
         message = (
-            f"Lexer error on '{self._current_char}' "
+            f"Lexer error on '{self.get_current_char()}' "
             f"line: {self._line_number}, "
             f"column: {self._column}"
         )

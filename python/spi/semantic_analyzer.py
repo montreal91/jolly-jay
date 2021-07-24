@@ -6,16 +6,14 @@ from spi.symbol import VarSymbol
 
 
 class SemanticAnalyzer(NodeVisitor):
-    def __init__(self, parser):
+    def __init__(self):
         self._scope = None
-        self._parser = parser
 
     @property
     def scope(self):
         return self._scope
 
-    def analyze(self):
-        tree = self._parser.parse()
+    def analyze(self, tree):
         self._visit(tree)
 
     def _throw_error(self, error_code, token):
@@ -114,3 +112,7 @@ class SemanticAnalyzer(NodeVisitor):
                 error_code=ErrorCode.ID_NOT_FOUND,
                 token=node.token
             )
+
+    def _visit_ProcedureCall(self, node):
+        for param_node in node.actual_params:
+            self._visit(param_node)

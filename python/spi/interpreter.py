@@ -6,19 +6,15 @@ from spi.semantic_analyzer import SemanticAnalyzer
 class Interpreter(NodeVisitor):
     def __init__(self, parser):
         self._parser = parser
-        self._semantic_analyzer = SemanticAnalyzer(parser)
         self.GLOBAL_SCOPE = dict()
 
     def execute(self):
         """
-        Executes the arithmetic expression.
-
-        Input: 42 * (3 + 4 * (12 - 3)) - (256 - 128 - 16 - 8 - 4) * (8 + 2)
-        Expected output: 638
-        (At this point integer and float division work the same way).
+        Executes a pascal program.
         """
-        self._semantic_analyzer.analyze()
         tree = self._parser.parse()
+        semantic_analyzer = SemanticAnalyzer()
+        semantic_analyzer.analyze(tree)
         return self._visit(tree)
 
     def _visit_ProcedureDeclaration(self, node):
@@ -81,6 +77,9 @@ class Interpreter(NodeVisitor):
             raise NameError(repr(var_name))
         else:
             return val
+
+    def _visit_ProcedureCall(self, node):
+        pass
 
     def _error(self):
         raise Exception("Incorrect parse tree.")
