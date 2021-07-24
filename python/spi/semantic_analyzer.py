@@ -114,5 +114,15 @@ class SemanticAnalyzer(NodeVisitor):
             )
 
     def _visit_ProcedureCall(self, node):
+        formal_parameters = self._scope.lookup(node.proc_name).params
+        if not _actual_parameters_valid(formal_parameters, node.actual_params):
+            self._throw_error(
+                error_code=ErrorCode.PROCEDURE_PARAMETERS_MISMATCH,
+                token=node.token
+            )
         for param_node in node.actual_params:
             self._visit(param_node)
+
+
+def _actual_parameters_valid(formal_parameters, actual_parameters):
+    return len(formal_parameters) == len(actual_parameters)

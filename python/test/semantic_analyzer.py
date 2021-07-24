@@ -143,6 +143,30 @@ class SemanticAnalyzerTc(TestCase):
             self.assertEqual(type(s6), ProcedureSymbol)
             self.assertEqual(s6.get_type().get_name(), PROCEDURE_TYPE)
 
+    def test_positive_argument_check(self):
+        with open("test/data/part16.pas") as source_file:
+            sa = SemanticAnalyzer()
+            sa.analyze(_make_parse_tree(text=source_file.read()))
+            self.assertTrue(True)
+
+    def test_argument_mismatch(self):
+        with open("test/data/part16ArgumentMismatch1.pas") as source_file:
+            sa = SemanticAnalyzer()
+            with self.assertRaises(SemanticError):
+                sa.analyze(_make_parse_tree(text=source_file.read()))
+
+    def test_argument_mismatch2(self):
+        with open("test/data/part16ArgumentMismatch2.pas") as source_file:
+            sa = SemanticAnalyzer()
+            with self.assertRaises(SemanticError):
+                sa.analyze(_make_parse_tree(text=source_file.read()))
+
+    def test_argument_mismatch3(self):
+        with open("test/data/part16ArgumentMismatch3.pas") as source_file:
+            sa = SemanticAnalyzer()
+            with self.assertRaises(SemanticError):
+                sa.analyze(_make_parse_tree(text=source_file.read()))
+
 
 def _make_parse_tree(text):
     parser = Parser(lexer=Lexer(text=text))
