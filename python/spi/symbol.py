@@ -42,7 +42,7 @@ class ProcedureSymbol(Symbol):
     def __str__(self):
         return (
             f"<{self.__class__.__name__}"
-            f"(name={self.name}, parameters={self.params})>"
+            f"(name={self._name}, parameters={self.params})>"
         )
 
     __repr__ = __str__
@@ -69,7 +69,7 @@ class ScopedSymbolTable:
         return self._enclosing_scope
 
     def __str__(self):
-        s = "Symbols: {symbols}".format(
+        return "Symbols: {symbols}".format(
             symbols=[val for val in self._symbols.values()]
         )
 

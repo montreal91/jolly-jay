@@ -1,4 +1,4 @@
-PROGRAM NameError1;
+PROGRAM Name_Error1;
 VAR
    a : INTEGER;
 

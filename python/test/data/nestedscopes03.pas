@@ -1,4 +1,4 @@
-program Main;
+program NestedScopes03;
    var x, y : real;
 
    procedure AlphaA(a : integer);

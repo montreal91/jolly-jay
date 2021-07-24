@@ -1,4 +1,4 @@
-program Main;
+program NestedScopes04;
    var x, y : real;
    var z : integer;
 

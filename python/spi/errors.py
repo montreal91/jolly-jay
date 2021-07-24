@@ -6,6 +6,10 @@ class ErrorCode(Enum):
     UNEXPECTED_TOKEN = "Unexpected Token"
     ID_NOT_FOUND = "Identifier not found"
     DUPLICATE_ID = "Duplicate id found"
+    PROCEDURE_PARAMETERS_MISMATCH = (
+        "Procedure formal and actual "
+        "parameters mismatch"
+    )
 
 
 class Error(Exception):
