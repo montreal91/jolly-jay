@@ -4,6 +4,7 @@ from enum import Enum
 
 class ArType(Enum):
     PROGRAM = "program"
+    PROCEDURE = "procedure"
 
 
 class ActivationRecord:
@@ -21,6 +22,10 @@ class ActivationRecord:
 
     def get(self, key):
         return self._members.get(key)
+
+    @property
+    def nesting_level(self):
+        return self._nesting_level
 
     def __str__(self):
         lines = [

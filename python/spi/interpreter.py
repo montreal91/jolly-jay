@@ -24,8 +24,10 @@ class Interpreter(NodeVisitor):
     def get_current_ar_for_test(self):
         return self._call_stack.peek()
 
+    # TODO: refactor it to make nicer function names
     def _visit_ProcedureDeclaration(self, node):
-        pass
+        ar = self._call_stack.peek()
+        ar[node.proc_name] = node
 
     def _visit_Program(self, node):
         self._log(f"ENTERING: PROGRAM {node.name}")
@@ -101,7 +103,27 @@ class Interpreter(NodeVisitor):
         return ar.get(var_name)
 
     def _visit_ProcedureCall(self, node):
-        pass
+        self._log(f"ENTERING: PROCEDURE {node.proc_name}")
+        current_ar = self._call_stack.peek()
+        procedure = current_ar.get(node.proc_name)
+
+        procedure_ar = ActivationRecord(
+            name=node.proc_name,
+            ar_type=ArType.PROCEDURE,
+            nesting_level=current_ar.nesting_level + 1
+        )
+        for i in range(len(node.actual_params)):
+            param_node = procedure.params[i]
+            procedure_ar[param_node.get_identifier()] = self._visit(node.actual_params[i])
+
+        self._call_stack.push(procedure_ar)
+        self._log(str(self._call_stack))
+        self._visit(procedure.block_node)
+
+        self._log(f"LEAVING: PROCEDURE {node.proc_name}")
+        self._log(str(self._call_stack))
+
+        self._call_stack.pop()
 
     def _error(self):
         raise Exception("Incorrect parse tree.")
