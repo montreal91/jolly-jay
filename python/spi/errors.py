@@ -29,3 +29,7 @@ class ParserError(Error):
 
 class SemanticError(Error):
     pass
+
+
+class RuntimeInterpreterError(Error):
+    pass

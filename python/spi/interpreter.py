@@ -98,14 +98,12 @@ class Interpreter(NodeVisitor):
         ar[var_name] = var_value
 
     def _visit_Var(self, node):
-        var_name = node.value
-        ar = self._call_stack.peek()
-        return ar.get(var_name)
+        return self._call_stack.access_variable(node.value)
 
     def _visit_ProcedureCall(self, node):
         self._log(f"ENTERING: PROCEDURE {node.proc_name}")
         current_ar = self._call_stack.peek()
-        procedure = current_ar.get(node.proc_name)
+        procedure = self._call_stack.access_variable(node.proc_name)
 
         procedure_ar = ActivationRecord(
             name=node.proc_name,

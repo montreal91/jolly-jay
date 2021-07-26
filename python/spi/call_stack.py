@@ -1,9 +1,23 @@
 
+from spi.errors import RuntimeInterpreterError
+
+
 class CallStack:
     def __init__(self):
         # TODO: try to replace it with linked list in the future and compare
         #       results.
         self._records = []
+
+    def access_variable(self, var_name):
+        var = self.peek().get(var_name)
+        if var is not None:
+            return var
+        var = self._records[0].get(var_name)
+        if var is not None:
+            return var
+
+        # After proper semantic check this should never happen
+        raise RuntimeInterpreterError()
 
     def push(self, ar):
         self._records.append(ar)
