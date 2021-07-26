@@ -79,6 +79,12 @@ class ProcedureDeclaration(Ast):
         self.params = params
         self.block_node = block_node
 
+    def __str__(self):
+        param_str = " ".join(str(param) for param in self.params)
+        return f"Procedure {self.proc_name}({param_str})"
+
+    __repr__ = __str__
+
 
 class NoOp(Ast):
     pass
@@ -88,6 +94,14 @@ class Param(Ast):
     def __init__(self, var_node, type_node):
         self.var_node = var_node
         self.type_node = type_node
+
+    def get_identifier(self):
+        return self.var_node.value
+
+    def __str__(self):
+        return f"{self.var_node.value} : {self.type_node.value}"
+
+    __repr__ = __str__
 
 
 class ProcedureCall(Ast):
